@@ -1,0 +1,421 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Terms & Conditions - Staff Portal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #ff914d;
+            --accent: #6b4f3b;
+            --bg: #fffaf3;
+            --text: #333;
+            --white: #ffffff;
+            --shadow: 0 4px 20px rgba(0,0,0,0.1);
+            --shadow-light: 0 2px 10px rgba(0,0,0,0.05);
+            --transition: 0.3s ease-in-out;
+            --success: #28a745;
+            --danger: #dc3545;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+        }
+
+        /* Header */
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 2rem;
+            background: var(--white);
+            box-shadow: var(--shadow-light);
+            z-index: 1000;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .user-name {
+            font-weight: 600;
+            color: var(--accent);
+        }
+
+        .logout-btn {
+            background: var(--danger);
+            color: var(--white);
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 6px;
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: all var(--transition);
+        }
+
+        .logout-btn:hover {
+            background: #c82333;
+        }
+
+        /* Main Content */
+        .main {
+            padding-top: 100px;
+            min-height: 100vh;
+            padding-bottom: 100px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .page-title {
+            text-align: center;
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--accent);
+            margin-bottom: 1rem;
+        }
+
+        .page-subtitle {
+            text-align: center;
+            color: var(--text);
+            margin-bottom: 3rem;
+        }
+
+        /* Content Card */
+        .content-card {
+            background: var(--white);
+            border-radius: 16px;
+            padding: 3rem;
+            box-shadow: var(--shadow-light);
+            margin-bottom: 2rem;
+        }
+
+        .section {
+            margin-bottom: 2.5rem;
+        }
+
+        .section:last-child {
+            margin-bottom: 0;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--accent);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .section-content {
+            color: var(--text);
+            line-height: 1.8;
+        }
+
+        .section-content p {
+            margin-bottom: 1rem;
+        }
+
+        .section-content ul {
+            margin-left: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .section-content li {
+            margin-bottom: 0.5rem;
+        }
+
+        .highlight {
+            background: #fff3cd;
+            padding: 1rem;
+            border-radius: 8px;
+            border-left: 4px solid var(--warning);
+            margin: 1rem 0;
+        }
+
+        .warning {
+            background: #f8d7da;
+            padding: 1rem;
+            border-radius: 8px;
+            border-left: 4px solid var(--danger);
+            margin: 1rem 0;
+        }
+
+        .info {
+            background: #d1ecf1;
+            padding: 1rem;
+            border-radius: 8px;
+            border-left: 4px solid var(--info);
+            margin: 1rem 0;
+        }
+
+        /* Back Button */
+        .back-section {
+            text-align: center;
+            margin-top: 3rem;
+        }
+
+        .back-btn {
+            background: var(--primary);
+            color: var(--white);
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-block;
+            transition: all var(--transition);
+        }
+
+        .back-btn:hover {
+            background: #e67e22;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(255, 145, 77, 0.3);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header {
+                padding: 1rem;
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .container {
+                padding: 1rem;
+            }
+
+            .page-title {
+                font-size: 2rem;
+            }
+
+            .content-card {
+                padding: 2rem;
+            }
+
+            .section-title {
+                font-size: 1.3rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="logo">🍴 Staff Portal</div>
+        <div class="user-info">
+            <span class="user-name">Welcome, {{ user.first_name|default:user.username }}</span>
+            <a href="{% url 'orders:logout' %}" class="logout-btn">Logout</a>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main">
+        <div class="container">
+            <h1 class="page-title">Terms & Conditions</h1>
+            <p class="page-subtitle">Please read our policies and guidelines</p>
+
+            <div class="content-card">
+                <!-- Ordering Policy -->
+                <div class="section">
+                    <h2 class="section-title">
+                        📋 Ordering Policy
+                    </h2>
+                    <div class="section-content">
+                        <p>By using our food ordering system, you agree to the following terms and conditions:</p>
+                        <ul>
+                            <li>Orders must be placed before the specified cutoff time for each meal</li>
+                            <li>Once an order is placed, it cannot be cancelled or modified</li>
+                            <li>Each staff member can place only one order per category per day</li>
+                            <li>Locked categories are not available for ordering</li>
+                            <li>Payment will be deducted from your monthly allowance or salary</li>
+                        </ul>
+                        <div class="highlight">
+                            <strong>Important:</strong> Please ensure you have sufficient balance before placing orders.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Payment Terms -->
+                <div class="section">
+                    <h2 class="section-title">
+                        💳 Payment Terms
+                    </h2>
+                    <div class="section-content">
+                        <p>Payment for food orders will be processed as follows:</p>
+                        <ul>
+                            <li>Orders are automatically charged to your account</li>
+                            <li>Payment is due immediately upon order placement</li>
+                            <li>Failed payments will result in order cancellation</li>
+                            <li>Refunds are only available for cancelled orders by the kitchen</li>
+                            <li>Monthly statements will be provided for all transactions</li>
+                        </ul>
+                        <div class="info">
+                            <strong>Note:</strong> Check your profile regularly to monitor your balance and payment history.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Food Quality & Safety -->
+                <div class="section">
+                    <h2 class="section-title">
+                        🍽️ Food Quality & Safety
+                    </h2>
+                    <div class="section-content">
+                        <p>We are committed to providing high-quality, safe food:</p>
+                        <ul>
+                            <li>All food is prepared fresh daily in our certified kitchen</li>
+                            <li>We follow strict hygiene and safety standards</li>
+                            <li>Special dietary requirements should be communicated in advance</li>
+                            <li>Report any food quality issues immediately to management</li>
+                            <li>We reserve the right to substitute menu items if necessary</li>
+                        </ul>
+                        <div class="warning">
+                            <strong>Allergy Alert:</strong> Please inform us of any food allergies or dietary restrictions.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Account Management -->
+                <div class="section">
+                    <h2 class="section-title">
+                        👤 Account Management
+                    </h2>
+                    <div class="section-content">
+                        <p>Your account responsibilities include:</p>
+                        <ul>
+                            <li>Keep your login credentials secure and confidential</li>
+                            <li>Update your profile information when changes occur</li>
+                            <li>Report any unauthorized account activity immediately</li>
+                            <li>Maintain sufficient balance for your orders</li>
+                            <li>Follow all system guidelines and policies</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Cancellation Policy -->
+                <div class="section">
+                    <h2 class="section-title">
+                        ❌ Cancellation Policy
+                    </h2>
+                    <div class="section-content">
+                        <p>Order cancellation terms:</p>
+                        <ul>
+                            <li>Orders cannot be cancelled by staff members once placed</li>
+                            <li>Kitchen may cancel orders due to unavailability</li>
+                            <li>Refunds will be processed within 2-3 business days</li>
+                            <li>Emergency cancellations must be approved by management</li>
+                            <li>Repeated cancellations may result in account restrictions</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Privacy Policy -->
+                <div class="section">
+                    <h2 class="section-title">
+                        🔒 Privacy Policy
+                    </h2>
+                    <div class="section-content">
+                        <p>We respect your privacy and protect your information:</p>
+                        <ul>
+                            <li>Personal information is used only for order processing</li>
+                            <li>Payment details are encrypted and securely stored</li>
+                            <li>Order history is maintained for accounting purposes</li>
+                            <li>We do not share personal information with third parties</li>
+                            <li>You can request data deletion at any time</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Contact Information -->
+                <div class="section">
+                    <h2 class="section-title">
+                        📞 Contact Information
+                    </h2>
+                    <div class="section-content">
+                        <p>For support and inquiries:</p>
+                        <ul>
+                            <li><strong>Kitchen:</strong> Extension 1234</li>
+                            <li><strong>Management:</strong> Extension 5678</li>
+                            <li><strong>IT Support:</strong> Extension 9999</li>
+                            <li><strong>Email:</strong> foodservice@company.com</li>
+                            <li><strong>Office Hours:</strong> 8:00 AM - 6:00 PM (Monday-Friday)</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Agreement -->
+                <div class="section">
+                    <h2 class="section-title">
+                        ✅ Agreement
+                    </h2>
+                    <div class="section-content">
+                        <p>By using this food ordering system, you acknowledge that you have read, understood, and agree to be bound by these terms and conditions.</p>
+                        <div class="highlight">
+                            <strong>Last Updated:</strong> {{ "now"|date:"F d, Y" }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Back Button -->
+            <div class="back-section">
+                <a href="{% url 'orders:home' %}" class="back-btn">← Back to Home</a>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Add smooth scrolling for internal links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Add reading progress indicator (optional)
+        window.addEventListener('scroll', function() {
+            const scrollTop = window.pageYOffset;
+            const docHeight = document.body.offsetHeight - window.innerHeight;
+            const scrollPercent = (scrollTop / docHeight) * 100;
+            
+            // You could add a progress bar here if needed
+        });
+    </script>
+</body>
+</html>

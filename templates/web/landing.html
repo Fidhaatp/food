@@ -1,0 +1,1365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Food Ordering Management System</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #ff914d;
+            --accent: #6b4f3b;
+            --bg: #fffaf3;
+            --text: #333;
+            --white: #ffffff;
+            --shadow: 0 4px 20px rgba(0,0,0,0.1);
+            --shadow-light: 0 2px 10px rgba(0,0,0,0.05);
+            --transition: 0.3s ease-in-out;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* Preloader Styles */
+        .preloader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to bottom, #e6f3ff, #fff0e6);
+            z-index: 10000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: opacity 0.5s ease-out;
+        }
+
+        .preloader.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        #preloader-canvas {
+            border: 1px solid #ccc;
+            background: linear-gradient(to bottom, #87CEEB, #FFFACD);
+            box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+            max-width: 100%;
+            max-height: 100%;
+        }
+
+        .preloader-message {
+            position: absolute;
+            bottom: 20px;
+            text-align: center;
+            color: #FF8C00;
+            font-size: 14px;
+            opacity: 0;
+            transition: opacity 0.5s;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        /* Header */
+        .header {
+            background: var(--white);
+            box-shadow: var(--shadow-light);
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+        }
+
+        .nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 0;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--primary);
+            text-decoration: none;
+        }
+
+        .nav-links {
+            display: flex;
+            list-style: none;
+            gap: 2rem;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: var(--text);
+            font-weight: 500;
+            transition: color var(--transition);
+        }
+
+        .nav-links a:hover {
+            color: var(--primary);
+        }
+
+        /* Hero Section */
+        .hero {
+            padding: 120px 0 80px;
+            text-align: center;
+            background: linear-gradient(135deg, #fff8ef 0%, #fff0e0 100%);
+        }
+
+        .hero h1 {
+            font-size: 3.5rem;
+            font-weight: 700;
+            color: var(--accent);
+            margin-bottom: 1rem;
+            line-height: 1.2;
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            color: var(--text);
+            margin-bottom: 3rem;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* Portal Cards */
+        .portals {
+            padding: 80px 0;
+        }
+
+        .portals h2 {
+            text-align: center;
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--accent);
+            margin-bottom: 3rem;
+        }
+
+        .portal-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .portal-card {
+            background: var(--white);
+            border-radius: 16px;
+            padding: 2rem;
+            text-align: center;
+            box-shadow: var(--shadow);
+            transition: all var(--transition);
+            cursor: pointer;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .portal-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+        }
+
+        .portal-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .portal-card h3 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--accent);
+            margin-bottom: 1rem;
+        }
+
+        .portal-card p {
+            color: var(--text);
+            margin-bottom: 1.5rem;
+        }
+
+        .portal-btn {
+            background: var(--primary);
+            color: var(--white);
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-block;
+            transition: all var(--transition);
+        }
+
+        .portal-btn:hover {
+            background: #e67e22;
+            transform: scale(1.05);
+        }
+
+        /* Features Section */
+        .features {
+            padding: 80px 0;
+            background: var(--white);
+        }
+
+        .features h2 {
+            text-align: center;
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--accent);
+            margin-bottom: 3rem;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .feature-card {
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .feature-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .feature-card h3 {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: var(--accent);
+            margin-bottom: 1rem;
+        }
+
+        .feature-card p {
+            color: var(--text);
+        }
+
+        /* Footer */
+        .footer {
+            background: var(--accent);
+            color: var(--white);
+            text-align: center;
+            padding: 2rem 0;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+
+            .hero p {
+                font-size: 1rem;
+            }
+
+            .nav-links {
+                display: none;
+            }
+
+            .portal-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+
+            /* Preloader Mobile Styles */
+            #preloader-canvas {
+                width: 100%;
+                height: auto;
+                max-width: 800px;
+                max-height: 600px;
+            }
+
+            .preloader-message {
+                font-size: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Preloader -->
+    <div class="preloader" id="preloader">
+        <canvas id="preloader-canvas" width="800" height="600"></canvas>
+        <div class="preloader-message" id="preloader-message">Loading your food order...</div>
+    </div>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <nav class="nav">
+                <a href="#" class="logo">🍴 Food Management System</a>
+                <ul class="nav-links">
+                    <li><a href="#home">Home</a></li>
+                    <li><a href="#portals">Portals</a></li>
+                    <li><a href="#features">Features</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero" id="home">
+        <div class="container">
+            <h1>Food Ordering Management System</h1>
+            <p>Streamline your organization's food ordering process with our comprehensive digital solution. From staff orders to kitchen management and detailed reporting.</p>
+        </div>
+    </section>
+
+    <!-- Portal Selection -->
+    <section class="portals" id="portals">
+        <div class="container">
+            <h2>Choose Your Portal</h2>
+            <div class="portal-grid">
+                <a href="{% url 'orders:login' %}" class="portal-card">
+                    <div class="portal-icon">👥</div>
+                    <h3>Staff Portal</h3>
+                    <p>Place food orders, view menu, and track your order history. Perfect for staff members to manage their daily meals.</p>
+                    <span class="portal-btn">Access Staff Portal</span>
+                </a>
+
+                <a href="{% url 'kitchen:login' %}" class="portal-card">
+                    <div class="portal-icon">👨‍🍳</div>
+                    <h3>Kitchen Portal</h3>
+                    <p>View and manage daily orders, update order status, and coordinate food preparation efficiently.</p>
+                    <span class="portal-btn">Access Kitchen Portal</span>
+                </a>
+
+                <a href="{% url 'management:login' %}" class="portal-card">
+                    <div class="portal-icon">📊</div>
+                    <h3>Manager Portal</h3>
+                    <p>Monitor expenses, generate reports, manage staff payments, and oversee the entire food ordering system.</p>
+                    <span class="portal-btn">Access Manager Portal</span>
+                </a>
+
+                <!-- <a href="/admin/" class="portal-card">
+                    <div class="portal-icon">⚙️</div>
+                    <h3>Super Admin</h3>
+                    <p>Full system control - manage users, categories, menus, and all system configurations.</p>
+                    <span class="portal-btn">Access Admin Panel</span>
+                </a> -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features" id="features">
+        <div class="container">
+            <h2>Key Features</h2>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">🔐</div>
+                    <h3>Role-Based Access</h3>
+                    <p>Secure authentication with different access levels for staff, kitchen, managers, and administrators.</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">📱</div>
+                    <h3>Real-Time Updates</h3>
+                    <p>Live order tracking and status updates for seamless coordination between all departments.</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">📈</div>
+                    <h3>Analytics & Reports</h3>
+                    <p>Comprehensive reporting with filters for daily, weekly, and monthly analysis of food expenses.</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">🎨</div>
+                    <h3>Modern UI</h3>
+                    <p>Clean, responsive design that works perfectly on desktop and mobile devices.</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">⚡</div>
+                    <h3>Fast & Efficient</h3>
+                    <p>Optimized performance with quick order placement and instant status updates.</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">🛡️</div>
+                    <h3>Secure & Reliable</h3>
+                    <p>Built with Django's robust security features and reliable data management.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2024 Food Ordering Management System. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Smooth scrolling for navigation links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Add scroll effect to header
+        window.addEventListener('scroll', () => {
+            const header = document.querySelector('.header');
+            if (window.scrollY > 100) {
+                header.style.background = 'rgba(255, 255, 255, 0.95)';
+                header.style.backdropFilter = 'blur(10px)';
+            } else {
+                header.style.background = 'var(--white)';
+                header.style.backdropFilter = 'none';
+            }
+        });
+
+        // Cinematic Preloader Animation
+        document.addEventListener('DOMContentLoaded', function() {
+            const canvas = document.getElementById('preloader-canvas');
+            const ctx = canvas.getContext('2d');
+            const message = document.getElementById('preloader-message');
+            const preloader = document.getElementById('preloader');
+            
+            // Cinematic color palette: deeper tones, realistic shades
+            const colors = {
+                skyBlue: '#87CEEB',
+                officeCream: '#FFFACD',
+                orangeAccent: '#FF8C00',
+                warmYellow: '#FFD700',
+                skinTone1: '#FDBCB4',
+                skinTone2: '#E8B923',
+                hairBrown: '#8B4513',
+                hairBlonde: '#DAA520',
+                shirtBlue: '#4169E1',
+                shirtPink: '#FF69B4',
+                shirtGreen: '#32CD32',
+                deskBrown: '#D2691E',
+                laptopGray: '#A9A9A9',
+                coffeeBrown: '#8B4513',
+                textBlack: '#000000',
+                glowOrange: '#FFA500',
+                bagBrown: '#A0522D',
+                foodIconGreen: '#228B22',
+                appIconBlue: '#1E90FF',
+                shadowDark: 'rgba(0,0,0,0.3)',
+                highlightLight: 'rgba(255,255,255,0.8)'
+            };
+            
+            // Realistic Character class: better proportions, dynamic lighting, facial details
+            class Character {
+                constructor(x, y, gender, hairColor, shirtColor, skinTone) {
+                    this.x = x;
+                    this.y = y;
+                    this.gender = gender;
+                    this.hairColor = hairColor;
+                    this.shirtColor = shirtColor;
+                    this.skinTone = skinTone;
+                    this.walkOffset = 0;
+                    this.expression = 'happy';
+                    this.scale = 1.1; // Slightly larger for cinematic focus
+                    this.hasBag = false;
+                    this.headTilt = 0; // For realistic head movement
+                }
+                draw(hasBag = false, lightAngle = 0) {
+                    ctx.save();
+                    ctx.translate(this.x, this.y);
+                    ctx.scale(this.scale, this.scale);
+                    // Dynamic shadow based on light
+                    ctx.shadowColor = colors.shadowDark;
+                    ctx.shadowBlur = 8;
+                    ctx.shadowOffsetX = Math.cos(lightAngle) * 5;
+                    ctx.shadowOffsetY = Math.sin(lightAngle) * 5;
+                    // Realistic torso with folds
+                    ctx.fillStyle = this.shirtColor;
+                    ctx.beginPath();
+                    ctx.ellipse(0, -5, 18, 40, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Fabric folds
+                    ctx.strokeStyle = this.shirtColor + '80';
+                    ctx.lineWidth = 2;
+                    ctx.beginPath();
+                    ctx.moveTo(-10, -20);
+                    ctx.quadraticCurveTo(0, -10, 10, -20);
+                    ctx.stroke();
+                    // Collar
+                    ctx.fillStyle = colors.textBlack;
+                    ctx.beginPath();
+                    ctx.moveTo(-10, -25);
+                    ctx.lineTo(0, -35);
+                    ctx.lineTo(10, -25);
+                    ctx.fill();
+                    // Head with gradient skin for realism
+                    const skinGrad = ctx.createRadialGradient(0, -50, 0, 0, -50, 15);
+                    skinGrad.addColorStop(0, this.skinTone);
+                    skinGrad.addColorStop(1, this.skinTone + 'CC');
+                    ctx.fillStyle = skinGrad;
+                    ctx.beginPath();
+                    ctx.arc(0, -50, 15, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.shadowBlur = 0;
+                    // Hair with strands and volume
+                    ctx.fillStyle = this.hairColor;
+                    ctx.beginPath();
+                    ctx.ellipse(0, -55, 20, 15, 0, 0, Math.PI * 2);
+                    // Strands
+                    ctx.strokeStyle = this.hairColor + '80';
+                    ctx.lineWidth = 1;
+                    for (let s = 0; s < 5; s++) {
+                        ctx.beginPath();
+                        ctx.moveTo(-10 + s*4, -60);
+                        ctx.quadraticCurveTo(-5 + s*4, -65, 0 + s*4, -62);
+                        ctx.stroke();
+                    }
+                    ctx.fill();
+                    // Eyes with realistic iris and reflection
+                    ctx.fillStyle = '#4A4A4A'; // Iris
+                    ctx.beginPath();
+                    ctx.ellipse(-6, -52, 2.5, 3, 0, 0, Math.PI * 2);
+                    ctx.ellipse(6, -52, 2.5, 3, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.fillStyle = colors.textBlack;
+                    ctx.beginPath();
+                    ctx.arc(-6, -52, 1.5, 0, Math.PI * 2);
+                    ctx.arc(6, -52, 1.5, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.fillStyle = colors.highlightLight;
+                    ctx.beginPath();
+                    ctx.arc(-5, -52.5, 0.8, 0, Math.PI * 2);
+                    ctx.arc(5, -52.5, 0.8, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Realistic mouth with teeth hint
+                    ctx.strokeStyle = colors.textBlack;
+                    ctx.lineWidth = 2;
+                    ctx.lineCap = 'round';
+                    if (this.expression === 'happy') {
+                        ctx.beginPath();
+                        ctx.arc(0, -45, 5, 0, Math.PI);
+                        ctx.stroke();
+                    } else if (this.expression === 'surprised') {
+                        ctx.beginPath();
+                        ctx.ellipse(0, -45, 8, 4, 0, Math.PI * 0.2, Math.PI * 0.8);
+                        ctx.stroke();
+                        ctx.font = 'bold 12px Arial';
+                        ctx.fillText('!', 8, -40);
+                    } else if (this.expression === 'laughing') {
+                        ctx.beginPath();
+                        ctx.arc(0, -42, 6, 0, Math.PI * 0.5);
+                        ctx.stroke();
+                        // Teeth
+                        ctx.fillStyle = '#FFFFFF';
+                        ctx.fillRect(-2, -42, 4, 2);
+                        // Laugh lines
+                        ctx.beginPath();
+                        ctx.moveTo(-10, -40);
+                        ctx.lineTo(-15, -35);
+                        ctx.moveTo(10, -40);
+                        ctx.lineTo(15, -35);
+                        ctx.stroke();
+                    } else if (this.expression === 'thoughtful') {
+                        ctx.beginPath();
+                        ctx.moveTo(-3, -42);
+                        ctx.lineTo(3, -42);
+                        ctx.stroke();
+                    }
+                    // Head tilt for expression
+                    ctx.translate(this.headTilt, 0);
+                    // Arms with realistic joints
+                    ctx.strokeStyle = this.skinTone;
+                    ctx.lineWidth = 5;
+                    ctx.lineCap = 'round';
+                    ctx.beginPath();
+                    ctx.moveTo(-15, -15);
+                    if (hasBag) {
+                        ctx.quadraticCurveTo(-25, 5, -30, 10);
+                    } else {
+                        ctx.lineTo(-25, -5);
+                    }
+                    ctx.moveTo(15, -15);
+                    ctx.lineTo(25, -5);
+                    ctx.stroke();
+                    // Hands
+                    ctx.fillStyle = this.skinTone;
+                    ctx.beginPath();
+                    ctx.ellipse(-25, -3, 4, 3, 0, 0, Math.PI * 2);
+                    ctx.ellipse(25, -3, 4, 3, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Legs with knees and walk cycle
+                    ctx.beginPath();
+                    const legOffset = Math.sin(this.walkOffset) * 10;
+                    ctx.moveTo(-8, 25);
+                    ctx.quadraticCurveTo(-8, 35, -8 + legOffset * 0.5, 45 + legOffset);
+                    ctx.moveTo(8, 25);
+                    ctx.quadraticCurveTo(8, 35, 8 - legOffset * 0.5, 45 - legOffset);
+                    ctx.stroke();
+                    // Shoes with shine
+                    ctx.fillStyle = '#333333';
+                    ctx.fillRect(-10, 45 + legOffset, 6, 4);
+                    ctx.fillRect(6, 45 - legOffset, 6, 4);
+                    ctx.fillStyle = colors.highlightLight;
+                    ctx.fillRect(-9, 46 + legOffset, 2, 1);
+                    ctx.fillRect(7, 46 - legOffset, 2, 1);
+                    // Bag with details
+                    if (hasBag) {
+                        const bagGrad = ctx.createLinearGradient(-20, 0, -20, 16);
+                        bagGrad.addColorStop(0, colors.bagBrown);
+                        bagGrad.addColorStop(1, colors.bagBrown + 'CC');
+                        ctx.fillStyle = bagGrad;
+                        ctx.beginPath();
+                        ctx.ellipse(-20, 5, 12, 8, 0, 0, Math.PI * 2);
+                        ctx.fill();
+                        // Zipper
+                        ctx.strokeStyle = colors.textBlack;
+                        ctx.lineWidth = 1;
+                        ctx.beginPath();
+                        ctx.moveTo(-26, 5);
+                        ctx.lineTo(-14, 5);
+                        ctx.stroke();
+                    }
+                    ctx.restore();
+                }
+                walk() {
+                    this.walkOffset += 0.2;
+                    this.x += 1.5;
+                    this.headTilt = Math.sin(this.walkOffset) * 2;
+                }
+                type() {
+                    this.walkOffset += 0.08;
+                    const typeOffset = Math.sin(Date.now() / 200) * 4;
+                    this.headTilt = Math.sin(Date.now() / 300) * 1;
+                    ctx.save();
+                    ctx.translate(this.x + typeOffset, this.y);
+                    this.draw(false);
+                    ctx.restore();
+                }
+            }
+            
+            // Cinematic Kiosk: with depth, reflections, and selection particles
+            function drawKiosk(x, y, selecting = false, selection = 0) {
+                // Base with shadow
+                ctx.shadowColor = colors.shadowDark;
+                ctx.shadowBlur = 10;
+                ctx.shadowOffsetY = 5;
+                ctx.fillStyle = colors.laptopGray;
+                ctx.fillRect(x - 35, y - 60, 70, 90);
+                ctx.shadowBlur = 0;
+                // Screen with reflection
+                const screenGrad = ctx.createLinearGradient(x - 30, y - 55, x + 30, y - 10);
+                screenGrad.addColorStop(0, colors.skyBlue);
+                screenGrad.addColorStop(1, colors.appIconBlue);
+                ctx.fillStyle = screenGrad;
+                ctx.fillRect(x - 30, y - 55, 60, 45);
+                // Screen reflection
+                ctx.fillStyle = colors.highlightLight;
+                ctx.fillRect(x - 30, y - 55, 60, 5);
+                // Buttons with 3D press effect
+                for (let i = 0; i < 3; i++) {
+                    const btnX = x - 15 + i * 15;
+                    const btnY = y - 5;
+                    const isSel = selecting && i === selection;
+                    ctx.shadowColor = isSel ? colors.glowOrange : colors.shadowDark;
+                    ctx.shadowBlur = isSel ? 12 : 4;
+                    ctx.fillStyle = isSel ? colors.glowOrange : colors.orangeAccent;
+                    ctx.beginPath();
+                    ctx.ellipse(btnX, btnY, 6, 6, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Button shine
+                    ctx.fillStyle = colors.highlightLight;
+                    ctx.beginPath();
+                    ctx.ellipse(btnX - 2, btnY - 2, 2, 2, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.shadowBlur = 0;
+                }
+                // Meal icons with hover glow
+                if (selecting) {
+                    ctx.font = '20px Arial';
+                    ctx.textAlign = 'center';
+                    const icons = ['🍔', '🍕', '🌮'];
+                    for (let i = 0; i < 3; i++) {
+                        const iconX = x - 15 + i * 15;
+                        const isSel = i === selection;
+                        if (isSel) {
+                            ctx.shadowColor = colors.glowOrange;
+                            ctx.shadowBlur = 10;
+                        }
+                        ctx.fillStyle = isSel ? colors.warmYellow : colors.foodIconGreen;
+                        ctx.fillText(icons[i], iconX, y - 25);
+                        ctx.shadowBlur = 0;
+                        // Selection particles
+                        if (isSel) {
+                            ctx.fillStyle = colors.glowOrange;
+                            for (let p = 0; p < 3; p++) {
+                                const px = iconX + Math.random() * 10 - 5;
+                                const py = y - 30 + Math.random() * 5;
+                                ctx.globalAlpha = 0.6;
+                                ctx.beginPath();
+                                ctx.arc(px, py, 1.5, 0, Math.PI * 2);
+                                ctx.fill();
+                            }
+                            ctx.globalAlpha = 1;
+                        }
+                    }
+                }
+            }
+            
+            // Cinematic Phone: with screen curve, notifications, and haptic feedback sim
+            function drawPhone(x, y, showConfirm = false, ordering = false) {
+                ctx.shadowColor = colors.shadowDark;
+                ctx.shadowBlur = 6;
+                ctx.shadowOffsetY = 3;
+                // Phone body with bevel
+                ctx.fillStyle = colors.laptopGray;
+                ctx.beginPath();
+                ctx.roundRect(x - 12, y - 35, 24, 55, 4);
+                ctx.fill();
+                ctx.shadowBlur = 0;
+                // Screen with curve
+                const screenGrad = ctx.createLinearGradient(x - 10, y - 33, x + 10, y + 2);
+                screenGrad.addColorStop(0, colors.appIconBlue);
+                screenGrad.addColorStop(1, colors.appIconBlue + 'CC');
+                ctx.fillStyle = screenGrad;
+                ctx.beginPath();
+                ctx.roundRect(x - 10, y - 33, 20, 35, 2);
+                ctx.fill();
+                // Screen reflection
+                ctx.fillStyle = colors.highlightLight;
+                ctx.fillRect(x - 10, y - 33, 20, 3);
+                if (ordering) {
+                    ctx.fillStyle = colors.foodIconGreen;
+                    ctx.font = 'bold 14px Arial';
+                    ctx.textAlign = 'center';
+                    ctx.fillText('Ordering...', x, y - 20);
+                    // Animated progress bar
+                    const progress = (Math.sin(Date.now() / 200) + 1) / 2;
+                    ctx.fillStyle = colors.orangeAccent;
+                    ctx.fillRect(x - 8, y - 8, progress * 16, 2);
+                } else if (showConfirm) {
+                    const bounce = Math.sin(Date.now() / 80) * 3;
+                    ctx.save();
+                    ctx.translate(0, bounce);
+                    ctx.fillStyle = colors.warmYellow;
+                    ctx.font = 'bold 11px Arial';
+                    ctx.textAlign = 'center';
+                    ctx.fillText('Order Confirmed! ✅', x, y - 25);
+                    // Vibration lines
+                    ctx.strokeStyle = colors.glowOrange;
+                    ctx.lineWidth = 1;
+                    for (let v = 0; v < 3; v++) {
+                        ctx.beginPath();
+                        ctx.moveTo(x - 10, y - 30 + v * 2);
+                        ctx.lineTo(x + 10, y - 30 + v * 2);
+                        ctx.setLineDash([2, 2]);
+                        ctx.stroke();
+                    }
+                    ctx.setLineDash([]);
+                    ctx.restore();
+                }
+            }
+            
+            // Cinematic Clock: with metallic face, smooth sweep hands, and ambient light
+            function drawClock(x, y, timeStr = '10:30') {
+                // Face with gradient for metal
+                const faceGrad = ctx.createRadialGradient(x, y, 0, x, y, 35);
+                faceGrad.addColorStop(0, '#FFFFFF');
+                faceGrad.addColorStop(1, colors.deskBrown);
+                ctx.fillStyle = faceGrad;
+                ctx.beginPath();
+                ctx.arc(x, y, 35, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.strokeStyle = colors.textBlack;
+                ctx.lineWidth = 3;
+                ctx.stroke();
+                // Hour marks with depth
+                for (let i = 0; i < 12; i++) {
+                    const angle = (i * Math.PI * 2) / 12 - Math.PI / 2;
+                    const inner = 25;
+                    const outer = 32;
+                    ctx.beginPath();
+                    ctx.moveTo(x + Math.cos(angle) * inner, y + Math.sin(angle) * inner);
+                    ctx.lineTo(x + Math.cos(angle) * outer, y + Math.sin(angle) * outer);
+                    ctx.stroke();
+                    // Numbers with shadow
+                    ctx.shadowColor = colors.shadowDark;
+                    ctx.shadowBlur = 2;
+                    ctx.fillStyle = colors.textBlack;
+                    ctx.font = 'bold 14px Arial';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    const numX = x + Math.cos(angle) * 22;
+                    const numY = y + Math.sin(angle) * 22;
+                    ctx.fillText((i === 0 ? 12 : i).toString(), numX, numY);
+                    ctx.shadowBlur = 0;
+                }
+                // Hands with sweep and thickness
+                const now = Date.now();
+                const secAngle = (now / 1000) % 60 * (Math.PI * 2 / 60) - Math.PI / 2;
+                const [hour, min] = timeStr.split(':').map(Number);
+                const hourAngle = ((hour % 12 + min / 60) * Math.PI * 2 / 12) - Math.PI / 2;
+                const minAngle = (min * Math.PI * 2 / 60) - Math.PI / 2;
+                // Second hand sweep
+                ctx.shadowColor = colors.glowOrange;
+                ctx.shadowBlur = 8;
+                ctx.strokeStyle = colors.orangeAccent;
+                ctx.lineWidth = 1;
+                ctx.lineCap = 'round';
+                ctx.beginPath();
+                ctx.moveTo(x, y);
+                ctx.lineTo(x + 28 * Math.cos(secAngle), y + 28 * Math.sin(secAngle));
+                ctx.stroke();
+                ctx.shadowBlur = 0;
+                // Minute hand
+                ctx.strokeStyle = colors.textBlack;
+                ctx.lineWidth = 4;
+                ctx.lineCap = 'round';
+                ctx.beginPath();
+                ctx.moveTo(x, y);
+                ctx.lineTo(x + 22 * Math.cos(minAngle), y + 22 * Math.sin(minAngle));
+                ctx.stroke();
+                // Hour hand
+                ctx.lineWidth = 5;
+                ctx.beginPath();
+                ctx.moveTo(x, y);
+                ctx.lineTo(x + 18 * Math.cos(hourAngle), y + 18 * Math.sin(hourAngle));
+                ctx.stroke();
+                // Center rivet
+                ctx.fillStyle = colors.textBlack;
+                ctx.beginPath();
+                ctx.arc(x, y, 4, 0, Math.PI * 2);
+                ctx.fill();
+                // Time text with glow
+                ctx.shadowColor = colors.textBlack;
+                ctx.shadowBlur = 4;
+                ctx.fillStyle = colors.textBlack;
+                ctx.font = 'bold 20px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText(timeStr, x, y + 50);
+                ctx.shadowBlur = 0;
+            }
+            
+            // Cinematic Message: with lens flare, depth of field blur, and particle system
+            function drawMessage(text, x, y) {
+                const bounceY = Math.sin(Date.now() / 180) * 6;
+                const scalePulse = 1 + Math.sin(Date.now() / 250) * 0.08;
+                ctx.save();
+                ctx.translate(x, y + bounceY);
+                ctx.scale(scalePulse, scalePulse);
+                // Glow layers
+                ctx.shadowColor = colors.glowOrange;
+                ctx.shadowBlur = 30;
+                ctx.fillStyle = colors.glowOrange + '40';
+                ctx.font = 'bold 60px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText(text, 0, 0);
+                ctx.shadowBlur = 15;
+                ctx.fillStyle = colors.glowOrange + '80';
+                ctx.fillText(text, 0, 0);
+                ctx.shadowBlur = 0;
+                ctx.fillStyle = colors.glowOrange;
+                ctx.fillText(text, 0, 0);
+                ctx.restore();
+                // Particle system for urgency
+                for (let i = 0; i < 12; i++) {
+                    const angle = (Date.now() / 100 + i * 30) % (Math.PI * 2);
+                    const px = x + Math.cos(angle) * 80;
+                    const py = y - 40 + Math.sin(angle) * 40;
+                    const size = 3 + Math.sin(Date.now() / 150 + i) * 2;
+                    ctx.globalAlpha = 0.8;
+                    ctx.fillStyle = colors.glowOrange;
+                    ctx.beginPath();
+                    ctx.arc(px, py, size, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Trail
+                    ctx.globalAlpha = 0.4;
+                    ctx.beginPath();
+                    ctx.arc(px - Math.cos(angle) * 5, py - Math.sin(angle) * 5, size * 0.5, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+                ctx.globalAlpha = 1;
+            }
+            
+            // Global vars
+            let char1, char2, char3, desks, confirmTime = 0, clockStartTime = 0, lightAngle = 0, cameraZoom = 1, cameraX = 0;
+            
+            // Scenes with cinematic enhancements: camera moves, lighting changes, depth
+            const scenes = [
+                // Scene 1: Cinematic walk-in with dolly zoom and dynamic lighting
+                {
+                    duration: 3500,
+                    setup: () => {
+                        char1 = new Character(-100, 300, 'f', colors.hairBlonde, colors.shirtPink, colors.skinTone1);
+                        char2 = new Character(-200, 300, 'f', colors.hairBrown, colors.shirtBlue, colors.skinTone1);
+                        char3 = new Character(-300, 300, 'm', colors.hairBrown, colors.shirtGreen, colors.skinTone2);
+                        [char1, char2, char3].forEach(c => { c.expression = 'happy'; c.hasBag = true; });
+                        cameraX = -100;
+                        cameraZoom = 0.8;
+                    },
+                    update: (time) => {
+                        lightAngle = time / 1000;
+                        cameraX += 1;
+                        cameraZoom = 0.8 + (time / 3500) * 0.2;
+                        ctx.save();
+                        ctx.translate(cameraX, 0);
+                        ctx.scale(cameraZoom, cameraZoom);
+                        ctx.clearRect(-canvas.width / cameraZoom, -canvas.height / cameraZoom, canvas.width * 2, canvas.height * 2);
+                        // Parallax background
+                        const grad = ctx.createLinearGradient(0, 0, 0, canvas.height);
+                        grad.addColorStop(0, colors.skyBlue);
+                        grad.addColorStop(1, colors.officeCream);
+                        ctx.fillStyle = grad;
+                        ctx.fillRect(0, 0, canvas.width * 2, canvas.height);
+                        // Moving clouds with parallax
+                        ctx.fillStyle = colors.highlightLight;
+                        for (let i = 0; i < 4; i++) {
+                            const cloudX = (time / 30 + i * 150) % (canvas.width * 2) - 100;
+                            const cloudY = 80 + i * 30;
+                            ctx.beginPath();
+                            ctx.arc(cloudX, cloudY, 25, 0, Math.PI * 2);
+                            ctx.arc(cloudX + 30, cloudY, 30, 0, Math.PI * 2);
+                            ctx.arc(cloudX + 60, cloudY, 25, 0, Math.PI * 2);
+                            ctx.fill();
+                        }
+                        // Office building with perspective
+                        ctx.fillStyle = colors.deskBrown;
+                        ctx.fillRect(600, 100, 150, 300);
+                        // Windows with light animation
+                        for (let i = 0; i < 8; i++) {
+                            const winX = 610 + i * 18;
+                            const winY = 110 + (i % 2) * 80;
+                            const glow = Math.sin(time / 400 + i) > 0 ? colors.shirtBlue : '#E0E0E0';
+                            ctx.fillStyle = glow;
+                            ctx.fillRect(winX, winY, 12, 12);
+                        }
+                        // Characters walking with depth sort
+                        [char3, char2, char1].forEach(c => {
+                            c.walk();
+                            if (c.x > canvas.width + 50) c.x = -150;
+                            c.draw(true, lightAngle);
+                        });
+                        // Foreground chat bubble with curve
+                        ctx.fillStyle = colors.highlightLight;
+                        ctx.strokeStyle = colors.textBlack;
+                        ctx.lineWidth = 1.5;
+                        ctx.beginPath();
+                        ctx.moveTo(char1.x - 40, char1.y - 55);
+                        ctx.quadraticCurveTo(char1.x - 20, char1.y - 70, char1.x, char1.y - 55);
+                        ctx.ellipse(char1.x - 20, char1.y - 60, 35, 18, 0, 0, Math.PI * 2);
+                        ctx.closePath();
+                        ctx.fill();
+                        ctx.stroke();
+                        ctx.fillStyle = colors.textBlack;
+                        ctx.font = '11px Arial';
+                        ctx.textAlign = 'center';
+                        ctx.fillText('Excited for lunch?', char1.x - 20, char1.y - 61);
+                        ctx.restore();
+                    }
+                },
+                // Scene 2: Desk work with focus pull, steam rise, and subtle pan
+                {
+                    duration: 3500,
+                    setup: () => {
+                        desks = [{x:200,y:320}, {x:350,y:320}, {x:500,y:320}];
+                        [char1, char2, char3].forEach(c => { c.hasBag = false; c.expression = 'thoughtful'; c.x = 150; });
+                        cameraX = 0;
+                        cameraZoom = 1;
+                    },
+                    update: (time) => {
+                        lightAngle = Math.PI / 4 + Math.sin(time / 2000) * 0.2;
+                        cameraX = Math.sin(time / 1000) * 20;
+                        const targets = [200, 350, 500];
+                        [char1, char2, char3].forEach((c, i) => {
+                            c.x += (targets[i] - c.x) * 0.06;
+                            c.y = 280;
+                            c.walkOffset += 0.06;
+                        });
+                        ctx.save();
+                        ctx.translate(cameraX, 0);
+                        ctx.scale(cameraZoom, cameraZoom);
+                        ctx.clearRect(0, 0, canvas.width, canvas.height);
+                        const grad = ctx.createLinearGradient(0, 0, 0, canvas.height);
+                        grad.addColorStop(0, colors.officeCream);
+                        grad.addColorStop(1, '#FFF5EE');
+                        ctx.fillStyle = grad;
+                        ctx.fillRect(0, 0, canvas.width, canvas.height);
+                        // Ambient office elements: swaying blinds
+                        ctx.strokeStyle = '#CCCCCC';
+                        ctx.lineWidth = 1;
+                        for (let b = 0; b < 5; b++) {
+                            const blindX = 50 + b * 100;
+                            const sway = Math.sin(time / 500 + b) * 3;
+                            for (let l = 0; l < 10; l++) {
+                                ctx.beginPath();
+                                ctx.moveTo(blindX + sway, 50 + l * 8);
+                                ctx.lineTo(blindX + sway, 58 + l * 8);
+                                ctx.stroke();
+                            }
+                        }
+                        // Desks with depth
+                        desks.forEach((d, i) => {
+                            // Desk shadow
+                            ctx.shadowColor = colors.shadowDark;
+                            ctx.shadowBlur = 5;
+                            ctx.shadowOffsetY = 3;
+                            ctx.fillStyle = colors.deskBrown;
+                            ctx.fillRect(d.x - 50, d.y, 100, 25);
+                            ctx.shadowBlur = 0;
+                            // Coffee with realistic steam and reflection
+                            const cupGrad = ctx.createRadialGradient(d.x + 4, d.y - 15, 0, d.x + 4, d.y - 15, 8);
+                            cupGrad.addColorStop(0, '#FFFFFF');
+                            cupGrad.addColorStop(1, colors.coffeeBrown);
+                            ctx.fillStyle = cupGrad;
+                            ctx.beginPath();
+                            ctx.arc(d.x + 4, d.y - 15, 8, 0, Math.PI * 2);
+                            ctx.fill();
+                            // Steam with curl
+                            ctx.strokeStyle = colors.highlightLight;
+                            ctx.lineWidth = 1.5;
+                            ctx.globalAlpha = 0.7;
+                            for (let s = 0; s < 5; s++) {
+                                const steamRise = Math.sin(time / 200 + s) * 2;
+                                const steamCurl = Math.cos(time / 300 + s) * 1;
+                                ctx.beginPath();
+                                ctx.moveTo(d.x + 4 + steamCurl, d.y - 15 - s * 6);
+                                ctx.quadraticCurveTo(d.x + 2 + steamRise, d.y - 25 - s * 6, d.x + 6, d.y - 35 - s * 6);
+                                ctx.stroke();
+                            }
+                            ctx.globalAlpha = 1;
+                            // Laptop with screen bezel and key glow
+                            ctx.fillStyle = colors.laptopGray;
+                            ctx.roundRect(d.x - 20, d.y - 40, 40, 25, 3);
+                            ctx.fill();
+                            const screenGrad = ctx.createLinearGradient(d.x - 15, d.y - 35, d.x + 15, d.y - 20);
+                            screenGrad.addColorStop(0, colors.appIconBlue);
+                            screenGrad.addColorStop(1, '#0000FF');
+                            ctx.fillStyle = screenGrad;
+                            ctx.roundRect(d.x - 15, d.y - 35, 30, 15, 2);
+                            ctx.fill();
+                            // Typing keys with realistic press
+                            ctx.fillStyle = '#444444';
+                            for (let k = 0; k < 6; k++) {
+                                const keyY = d.y - 22 + (Math.sin(time / 120 + k * 2) > 0 ? 1 : 0);
+                                ctx.fillRect(d.x - 12 + k * 4.5, keyY, 3.5, 2.5);
+                            }
+                        });
+                        // Characters with individual lighting
+                        [char1, char2, char3].forEach(c => c.type());
+                        // Foreground plant with leaf detail
+                        ctx.fillStyle = colors.foodIconGreen;
+                        const plantSway = Math.sin(time / 700) * 8;
+                        ctx.save();
+                        ctx.translate(100 + plantSway, 550);
+                        ctx.beginPath();
+                        ctx.ellipse(0, 0, 20, 30, Math.sin(time / 1000) * 0.1, 0, Math.PI * 2);
+                        ctx.fill();
+                        // Leaves
+                        ctx.strokeStyle = colors.foodIconGreen + '80';
+                        ctx.lineWidth = 3;
+                        for (let l = 0; l < 4; l++) {
+                            const leafAngle = l * Math.PI / 2;
+                            ctx.beginPath();
+                            ctx.ellipse(0, -10, 8, 15, leafAngle, 0, Math.PI * 2);
+                            ctx.stroke();
+                        }
+                        ctx.restore();
+                        ctx.restore();
+                    }
+                },
+                // Scene 3: Kiosk gathering with rack focus and selection cycle
+                {
+                    duration: 3500,
+                    setup: () => {
+                        selection = 0;
+                        cameraZoom = 1;
+                    },
+                    update: (time) => {
+                        lightAngle = Math.PI / 3;
+                        const targets = [370, 400, 430];
+                        [char1, char2, char3].forEach((c, i) => {
+                            c.x += (targets[i] - c.x) * 0.05;
+                            c.y = 280;
+                            c.expression = 'happy';
+                            c.headTilt = Math.sin(time / 400 + i) * 3;
+                        });
+                        selection = Math.floor(time / 900) % 3;
+                        ctx.save();
+                        ctx.scale(cameraZoom, cameraZoom);
+                        ctx.clearRect(0, 0, canvas.width, canvas.height);
+                        const grad = ctx.createLinearGradient(0, 0, 0, canvas.height);
+                        grad.addColorStop(0, colors.officeCream);
+                        grad.addColorStop(1, '#FFF5EE');
+                        ctx.fillStyle = grad;
+                        ctx.fillRect(0, 0, canvas.width, canvas.height);
+                        drawKiosk(400, 280, true, selection);
+                        [char1, char2, char3].forEach(c => c.draw(false, lightAngle));
+                        // Animated pointing with finger extension
+                        ctx.strokeStyle = colors.skinTone1;
+                        ctx.lineWidth = 4;
+                        ctx.lineCap = 'round';
+                        const pointExtend = Math.sin(time / 250) * 10;
+                        ctx.beginPath();
+                        ctx.moveTo(char1.x + 15, char1.y - 15);
+                        ctx.lineTo(char1.x + 25 + pointExtend, char1.y - 25);
+                        ctx.moveTo(char3.x - 15, char3.y - 15);
+                        ctx.lineTo(char3.x - 25 - pointExtend, char3.y - 25);
+                        ctx.stroke();
+                        // Finger tip
+                        ctx.fillStyle = colors.skinTone1;
+                        ctx.beginPath();
+                        ctx.ellipse(char1.x + 25 + pointExtend, char1.y - 25, 3, 2, 0, 0, Math.PI * 2);
+                        ctx.ellipse(char3.x - 25 - pointExtend, char3.y - 25, 3, 2, 0, 0, Math.PI * 2);
+                        ctx.fill();
+                        ctx.restore();
+                    }
+                },
+                // Scene 4: Surprise reaction with slow-mo shake and laugh echoes
+                {
+                    duration: 3000,
+                    setup: () => {
+                        char3.expression = 'surprised';
+                        char1.expression = 'laughing';
+                        char2.expression = 'laughing';
+                        cameraZoom = 1.2; // Close-up
+                    },
+                    update: (time) => {
+                        lightAngle = Math.PI / 2;
+                        const slowMo = time / 3000;
+                        ctx.save();
+                        ctx.scale(cameraZoom, cameraZoom);
+                        ctx.translate(-100, 0); // Pan to group
+                        ctx.clearRect(0, 0, canvas.width, canvas.height);
+                        const grad = ctx.createLinearGradient(0, 0, 0, canvas.height);
+                        grad.addColorStop(0, colors.officeCream);
+                        grad.addColorStop(1, '#FFF5EE');
+                        ctx.fillStyle = grad;
+                        ctx.fillRect(0, 0, canvas.width, canvas.height);
+                        drawKiosk(400, 280);
+                        [char1, char2, char3].forEach(c => {
+                            c.headTilt = Math.sin(time / 150 + c.x % 3) * 5 * (1 - slowMo); // Slow shake
+                            c.draw(false, lightAngle);
+                        });
+                        // Laugh bubbles with expansion
+                        const bubbleExpand = 15 + Math.sin(time / 150) * 5;
+                        ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+                        ctx.beginPath();
+                        ctx.arc(char1.x - 30, char1.y - 70, bubbleExpand, 0, Math.PI * 2);
+                        ctx.arc(char2.x + 30, char2.y - 70, bubbleExpand, 0, Math.PI * 2);
+                        ctx.fill();
+                        ctx.strokeStyle = colors.textBlack;
+                        ctx.lineWidth = 2;
+                        ctx.stroke();
+                        ctx.fillStyle = colors.textBlack;
+                        ctx.font = 'bold 14px Arial';
+                        ctx.textAlign = 'center';
+                        ctx.fillText('HAHA!', char1.x - 30, char1.y - 72);
+                        ctx.fillText('LOL!', char2.x + 30, char2.y - 72);
+                        // Echo lines
+                        ctx.strokeStyle = 'rgba(0,0,0,0.2)';
+                        ctx.lineWidth = 1;
+                        ctx.beginPath();
+                        ctx.moveTo(char1.x - 45, char1.y - 55);
+                        ctx.lineTo(char1.x - 15, char1.y - 55);
+                        ctx.moveTo(char2.x + 15, char2.y - 55);
+                        ctx.lineTo(char2.x + 45, char2.y - 55);
+                        ctx.stroke();
+                        ctx.restore();
+                    }
+                },
+                // Scene 5: Phone order with over-the-shoulder shot and quick cuts
+                {
+                    duration: 3500,
+                    setup: () => {
+                        confirmTime = 0;
+                        char3.expression = 'happy';
+                        cameraZoom = 1;
+                    },
+                    update: (time) => {
+                        lightAngle = Math.PI / 4;
+                        const targetsOthers = [370, 430];
+                        [char1, char2].forEach((c, i) => {
+                            c.x += (targetsOthers[i] - c.x) * 0.04;
+                            c.expression = 'happy';
+                            c.draw(false, lightAngle);
+                        });
+                        char3.x += (460 - char3.x) * 0.06;
+                        char3.y = 290;
+                        const isOrdering = time < 1750;
+                        const showConfirm = time >= 1750;
+                        ctx.save();
+                        if (showConfirm) {
+                            ctx.translate(50, 0); // Slight pan to phone
+                            ctx.scale(1.1, 1.1);
+                        }
+                        ctx.clearRect(0, 0, canvas.width, canvas.height);
+                        const grad = ctx.createLinearGradient(0, 0, 0, canvas.height);
+                        grad.addColorStop(0, colors.officeCream);
+                        grad.addColorStop(1, '#FFF5EE');
+                        ctx.fillStyle = grad;
+                        ctx.fillRect(0, 0, canvas.width, canvas.height);
+                        drawKiosk(400, 280);
+                        char3.draw(false, lightAngle);
+                        drawPhone(char3.x, char3.y, showConfirm, isOrdering);
+                        if (showConfirm) confirmTime = time;
+                        ctx.restore();
+                    }
+                },
+                // Scene 6: Clock tick with time-lapse and building tension zoom
+                {
+                    duration: 3500,
+                    setup: () => {
+                        clockStartTime = Date.now();
+                        cameraZoom = 0.9;
+                    },
+                    update: (time) => {
+                        lightAngle = time / 2000;
+                        cameraZoom = 0.9 + (time / 3500) * 0.3; // Zoom in on clock
+                        const elapsed = time / 1000;
+                        const mins = Math.floor(elapsed * 0.5) % 60; // Faster tick for cinematic
+                        const hrs = 10 + Math.floor(mins / 60);
+                        let displayTime = `${hrs % 12 || 12}:${mins < 10 ? '0' : ''}${mins}`;
+                        if (mins >= 30) displayTime = '10:30';
+                        ctx.save();
+                        ctx.scale(cameraZoom, cameraZoom);
+                        ctx.clearRect(0, 0, canvas.width, canvas.height);
+                        const grad = ctx.createLinearGradient(0, 0, 0, canvas.height);
+                        grad.addColorStop(0, colors.officeCream);
+                        grad.addColorStop(1, '#FFF5EE');
+                        ctx.fillStyle = grad;
+                        ctx.fillRect(0, 0, canvas.width, canvas.height);
+                        drawClock(400, 200, displayTime);
+                        [char1, char2, char3].forEach((c, i) => {
+                            c.x = 400 + Math.sin(time / 500 + i) * 50; // Heightened anticipation
+                            c.y = 350;
+                            c.headTilt = Math.sin(time / 300 + i) * 4;
+                            c.draw(false, lightAngle);
+                        });
+                        // Tension vignette
+                        const vignetteGrad = ctx.createRadialGradient(400, 300, 0, 400, 300, 400);
+                        vignetteGrad.addColorStop(0, 'rgba(0,0,0,0)');
+                        vignetteGrad.addColorStop(1, 'rgba(0,0,0,0.3)');
+                        ctx.fillStyle = vignetteGrad;
+                        ctx.fillRect(0, 0, canvas.width, canvas.height);
+                        // Tick pulses with radial lines
+                        const tickIntensity = Math.sin(time / 60) * 3;
+                        ctx.strokeStyle = colors.orangeAccent + '40';
+                        ctx.lineWidth = 1;
+                        for (let t = 0; t < 12; t++) {
+                            const tickAngle = t * Math.PI / 6;
+                            ctx.beginPath();
+                            ctx.moveTo(400 + Math.cos(tickAngle) * 30, 200 + Math.sin(tickAngle) * 30);
+                            ctx.lineTo(400 + Math.cos(tickAngle) * (50 + tickIntensity), 200 + Math.sin(tickAngle) * (50 + tickIntensity));
+                            ctx.stroke();
+                        }
+                        ctx.restore();
+                    }
+                },
+                // Scene 7: Urgent message with dramatic reveal, shake, and final zoom out
+                {
+                    duration: 6000,
+                    setup: () => {
+                        [char1, char2, char3].forEach(c => { 
+                            c.expression = 'surprised'; 
+                            c.x = 300 + Math.random() * 200;
+                            c.y = 350;
+                        });
+                        cameraZoom = 1.5;
+                    },
+                    update: (time) => {
+                        lightAngle = Math.PI + Math.sin(time / 100) * 0.5;
+                        const shakeX = Math.sin(time / 50) * 2;
+                        const shakeY = Math.cos(time / 70) * 1;
+                        ctx.save();
+                        ctx.translate(shakeX, shakeY);
+                        ctx.scale(cameraZoom, cameraZoom);
+                        ctx.clearRect(0, 0, canvas.width, canvas.height);
+                        const grad = ctx.createLinearGradient(0, 0, 0, canvas.height);
+                        grad.addColorStop(0, colors.officeCream);
+                        grad.addColorStop(1, '#FFF5EE');
+                        ctx.fillStyle = grad;
+                        ctx.fillRect(0, 0, canvas.width, canvas.height);
+                        drawClock(400, 200, '10:30');
+                        [char1, char2, char3].forEach(c => {
+                            c.x += Math.sin(time / 150) * 6; // Dramatic reaction
+                            c.headTilt = Math.sin(time / 100) * 8;
+                            c.draw(false, lightAngle);
+                        });
+                        drawMessage('TIME IS OVER!', 400, 350);
+                        // Dramatic flash
+                        if (time > 2000) {
+                            const flash = Math.sin(time / 100) > 0 ? 0.5 : 0;
+                            ctx.fillStyle = `rgba(255, 165, 0, ${flash})`;
+                            ctx.fillRect(0, 0, canvas.width, canvas.height);
+                        }
+                        ctx.restore();
+                    }
+                }
+            ];
+            
+            let currentScene = 0;
+            let sceneStartTime = Date.now();
+            let setupDone = false;
+            
+            function animate() {
+                const now = Date.now();
+                let sceneTime = now - sceneStartTime;
+                const current = scenes[currentScene];
+                if (!setupDone) {
+                    if (currentScene === 0) {
+                        char1 = char2 = char3 = null;
+                    }
+                    current.setup();
+                    setupDone = true;
+                    sceneStartTime = now;
+                    sceneTime = 0;
+                }
+                current.update(sceneTime);
+                if (sceneTime > current.duration) {
+                    currentScene = (currentScene + 1) % scenes.length;
+                    sceneStartTime = now;
+                    setupDone = false;
+                }
+                if (currentScene === 6 && sceneTime > 1000) {
+                    message.style.opacity = 1;
+                }
+                
+                // Hide preloader after all scenes complete
+                if (currentScene === 6 && sceneTime > 5000) {
+                    preloader.classList.add('hidden');
+                    setTimeout(() => {
+                        preloader.remove();
+                    }, 500);
+                    return;
+                }
+                
+                requestAnimationFrame(animate);
+            }
+            
+            animate();
+        });
+    </script>
+</body>
+</html>

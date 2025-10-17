@@ -1,0 +1,817 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bill Report - Manager Portal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #ff914d;
+            --accent: #6b4f3b;
+            --bg: #fffaf3;
+            --text: #333;
+            --white: #ffffff;
+            --shadow: 0 4px 20px rgba(0,0,0,0.1);
+            --shadow-light: 0 2px 10px rgba(0,0,0,0.05);
+            --transition: 0.3s ease-in-out;
+            --success: #28a745;
+            --warning: #ffc107;
+            --danger: #dc3545;
+            --info: #17a2b8;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+        }
+
+        /* Header */
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 2rem;
+            background: var(--white);
+            box-shadow: var(--shadow-light);
+            z-index: 1000;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .user-name {
+            font-weight: 600;
+            color: var(--accent);
+        }
+
+        .logout-btn {
+            background: var(--danger);
+            color: var(--white);
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 6px;
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: all var(--transition);
+        }
+
+        .logout-btn:hover {
+            background: #c82333;
+        }
+
+        /* Main Content */
+        .main {
+            padding-top: 100px;
+            min-height: 100vh;
+            padding-bottom: 100px;
+            display: flex;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 250px;
+            background: var(--white);
+            box-shadow: var(--shadow-light);
+            padding: 2rem 0;
+            position: fixed;
+            left: 0;
+            top: 100px;
+            height: calc(100vh - 100px);
+            overflow-y: auto;
+            z-index: 999;
+            transition: all var(--transition);
+        }
+
+        .sidebar-header {
+            padding: 0 2rem 1.5rem;
+            border-bottom: 1px solid #f0f0f0;
+            margin-bottom: 1rem;
+        }
+
+        .sidebar-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--accent);
+            margin-bottom: 0.5rem;
+        }
+
+        .sidebar-subtitle {
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        .sidebar-nav {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .sidebar-nav-item {
+            margin: 0;
+        }
+
+        .sidebar-nav-link {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem 2rem;
+            text-decoration: none;
+            color: var(--text);
+            transition: all var(--transition);
+            border-left: 3px solid transparent;
+        }
+
+        .sidebar-nav-link:hover {
+            background: #f8f9fa;
+            color: var(--primary);
+            border-left-color: var(--primary);
+        }
+
+        .sidebar-nav-link.active {
+            background: #fff3e0;
+            color: var(--primary);
+            border-left-color: var(--primary);
+            font-weight: 600;
+        }
+
+        .sidebar-nav-icon {
+            font-size: 1.2rem;
+            width: 20px;
+            text-align: center;
+        }
+
+        .sidebar-nav-text {
+            font-size: 0.95rem;
+        }
+
+        /* Content Area */
+        .content {
+            flex: 1;
+            margin-left: 250px;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .page-title {
+            text-align: center;
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--accent);
+            margin-bottom: 1rem;
+        }
+
+        .page-subtitle {
+            text-align: center;
+            color: var(--text);
+            margin-bottom: 3rem;
+        }
+
+        /* Filter Section */
+        .filter-section {
+            background: var(--white);
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: var(--shadow-light);
+            margin-bottom: 2rem;
+        }
+
+        .filter-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: var(--accent);
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+
+        .filter-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 1.5rem;
+        }
+
+        .filter-btn {
+            padding: 0.75rem 1.5rem;
+            border: 2px solid var(--primary);
+            background: transparent;
+            color: var(--primary);
+            border-radius: 25px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all var(--transition);
+            text-decoration: none;
+        }
+
+        .filter-btn:hover,
+        .filter-btn.active {
+            background: var(--primary);
+            color: var(--white);
+        }
+
+        .date-range {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .date-input {
+            padding: 0.75rem;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all var(--transition);
+        }
+
+        .date-input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .apply-btn {
+            background: var(--primary);
+            color: var(--white);
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all var(--transition);
+        }
+
+        .apply-btn:hover {
+            background: #e67e22;
+        }
+
+        /* Summary Cards */
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .summary-card {
+            background: var(--white);
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: var(--shadow-light);
+            text-align: center;
+            transition: all var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .summary-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--primary);
+        }
+
+        .summary-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow);
+        }
+
+        .summary-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .summary-number {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .summary-label {
+            color: var(--text);
+            font-weight: 500;
+            font-size: 1.1rem;
+        }
+
+        /* Staff Summary Table */
+        .staff-summary-section {
+            background: var(--white);
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: var(--shadow-light);
+            margin-bottom: 3rem;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--accent);
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+
+        .staff-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+
+        .staff-table th,
+        .staff-table td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+
+        .staff-table th {
+            background: var(--primary);
+            color: var(--white);
+            font-weight: 600;
+        }
+
+        .staff-table tr:hover {
+            background: #f8f9fa;
+        }
+
+        .staff-name {
+            font-weight: 600;
+            color: var(--accent);
+        }
+
+        .amount-cell {
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        .no-data {
+            text-align: center;
+            color: #666;
+            padding: 2rem;
+            font-style: italic;
+        }
+
+        /* Bottom Navigation */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--white);
+            display: none;
+            justify-content: space-around;
+            padding: 0.75rem 0;
+            box-shadow: var(--shadow-light);
+            border-top-left-radius: 20px;
+            border-top-right-radius: 20px;
+            z-index: 1000;
+        }
+
+        .bottom-nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-decoration: none;
+            color: var(--text);
+            font-size: 0.8rem;
+            padding: 0.5rem;
+            transition: all var(--transition);
+            border-radius: 50%;
+        }
+
+        .bottom-nav-item.active {
+            background: var(--primary);
+            color: var(--white);
+        }
+
+        .bottom-nav-item:hover {
+            color: var(--primary);
+        }
+
+        /* Mobile Sidebar Toggle */
+        .sidebar-toggle {
+            display: none;
+            background: var(--primary);
+            color: var(--white);
+            border: none;
+            padding: 0.5rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1.2rem;
+        }
+
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 998;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header {
+                padding: 1rem;
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .sidebar-toggle {
+                display: block;
+            }
+
+            .sidebar {
+                transform: translateX(-100%);
+                width: 280px;
+            }
+
+            .sidebar.open {
+                transform: translateX(0);
+            }
+
+            .sidebar-overlay.open {
+                display: block;
+            }
+
+            .content {
+                margin-left: 0;
+                padding: 1rem;
+            }
+
+            .container {
+                padding: 0;
+            }
+
+            .page-title {
+                font-size: 2rem;
+            }
+
+            .filter-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .date-range {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .summary-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .staff-table {
+                font-size: 0.9rem;
+            }
+
+            .staff-table th,
+            .staff-table td {
+                padding: 0.5rem;
+            }
+
+            .bottom-nav {
+                display: flex;
+            }
+
+            .main {
+                padding-bottom: 100px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="logo">📊 Manager Portal</div>
+        <div class="user-info">
+            <button class="sidebar-toggle" onclick="toggleSidebar()">☰</button>
+            <span class="user-name">Welcome, {{ user.username }}</span>
+            <a href="{% url 'management:logout' %}" class="logout-btn">Logout</a>
+        </div>
+    </header>
+
+    <!-- Sidebar Overlay -->
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-title">Management</div>
+            <div class="sidebar-subtitle">Navigation Menu</div>
+        </div>
+        <nav>
+            <ul class="sidebar-nav">
+                <li class="sidebar-nav-item">
+                    <a href="{% url 'management:home' %}" class="sidebar-nav-link">
+                        <span class="sidebar-nav-icon">🏠</span>
+                        <span class="sidebar-nav-text">Dashboard</span>
+                    </a>
+                </li>
+                <li class="sidebar-nav-item">
+                    <a href="{% url 'management:bill_report' %}" class="sidebar-nav-link active">
+                        <span class="sidebar-nav-icon">📊</span>
+                        <span class="sidebar-nav-text">Bill Reports</span>
+                    </a>
+                </li>
+                <li class="sidebar-nav-item">
+                    <a href="{% url 'management:staff_list' %}" class="sidebar-nav-link">
+                        <span class="sidebar-nav-icon">👥</span>
+                        <span class="sidebar-nav-text">Staff Management</span>
+                    </a>
+                </li>
+                <li class="sidebar-nav-item">
+                    <a href="/admin/" class="sidebar-nav-link">
+                        <span class="sidebar-nav-icon">⚙️</span>
+                        <span class="sidebar-nav-text">Admin Panel</span>
+                    </a>
+                </li>
+                <li class="sidebar-nav-item">
+                    <a href="{% url 'orders:home' %}" class="sidebar-nav-link">
+                        <span class="sidebar-nav-icon">🍽️</span>
+                        <span class="sidebar-nav-text">Orders Portal</span>
+                    </a>
+                </li>
+                <li class="sidebar-nav-item">
+                    <a href="{% url 'kitchen:home' %}" class="sidebar-nav-link">
+                        <span class="sidebar-nav-icon">👨‍🍳</span>
+                        <span class="sidebar-nav-text">Kitchen Portal</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main">
+        <div class="content">
+            <div class="container">
+            <h1 class="page-title">Bill Report</h1>
+            <p class="page-subtitle">Financial reports and staff summaries</p>
+
+            <!-- Filter Section -->
+            <div class="filter-section">
+                <h2 class="filter-title">Filter Reports</h2>
+                <div class="filter-buttons">
+                    <a href="?filter=month" class="filter-btn {% if filter_type == 'month' %}active{% endif %}">This Month</a>
+                    <a href="?filter=week" class="filter-btn {% if filter_type == 'week' %}active{% endif %}">This Week</a>
+                    <a href="?filter=day" class="filter-btn {% if filter_type == 'day' %}active{% endif %}">Today</a>
+                    <a href="?filter=custom" class="filter-btn {% if filter_type == 'custom' %}active{% endif %}">Custom Range</a>
+                </div>
+                
+                {% if filter_type == 'custom' %}
+                <div class="date-range">
+                    <input type="date" class="date-input" id="startDate" value="{{ start_date|date:'Y-m-d' }}">
+                    <span>to</span>
+                    <input type="date" class="date-input" id="endDate" value="{{ end_date|date:'Y-m-d' }}">
+                    <button class="apply-btn" onclick="applyCustomFilter()">Apply</button>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Summary Cards -->
+            <div class="summary-grid">
+                <div class="summary-card">
+                    <div class="summary-icon">💰</div>
+                    <div class="summary-number">₹{{ total_revenue|floatformat:0 }}</div>
+                    <div class="summary-label">Total Revenue</div>
+                </div>
+                <div class="summary-card">
+                    <div class="summary-icon">✅</div>
+                    <div class="summary-number">₹{{ completed_revenue|floatformat:0 }}</div>
+                    <div class="summary-label">Completed Revenue</div>
+                </div>
+                <div class="summary-card">
+                    <div class="summary-icon">⏳</div>
+                    <div class="summary-number">₹{{ pending_revenue|floatformat:0 }}</div>
+                    <div class="summary-label">Pending Revenue</div>
+                </div>
+                <div class="summary-card">
+                    <div class="summary-icon">👥</div>
+                    <div class="summary-number">{{ total_staff }}</div>
+                    <div class="summary-label">Active Staff</div>
+                </div>
+            </div>
+
+            <!-- Staff Summary Table -->
+            <div class="staff-summary-section">
+                <h2 class="section-title">Staff Summary</h2>
+                <p style="text-align: center; color: #666; margin-bottom: 1rem;">
+                    Showing data from {{ start_date|date:"M d, Y" }} to {{ end_date|date:"M d, Y" }}
+                </p>
+                
+                {% if staff_summary %}
+                <table class="staff-table">
+                    <thead>
+                        <tr>
+                            <th>Staff Name</th>
+                            <th>Total Days</th>
+                            <th>Total Amount</th>
+                            <th>Completed Amount</th>
+                            <th>Balance</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for staff in staff_summary %}
+                        <tr>
+                            <td class="staff-name">{{ staff.user.first_name|default:staff.user.username }}</td>
+                            <td>{{ staff.total_orders }}</td>
+                            <td class="amount-cell">₹{{ staff.total_amount|floatformat:0 }}</td>
+                            <td class="amount-cell">₹{{ staff.completed_amount|floatformat:0 }}</td>
+                            <td class="amount-cell">₹{{ staff.balance|floatformat:0 }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}
+                <div class="no-data">
+                    <h3>No data found</h3>
+                    <p>No staff data available for the selected time period.</p>
+                </div>
+                {% endif %}
+            </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Bottom Navigation -->
+    <nav class="bottom-nav">
+        <a href="{% url 'management:home' %}" class="bottom-nav-item">
+            <span>🏠</span>
+            <span>Dashboard</span>
+        </a>
+        <a href="{% url 'management:bill_report' %}" class="bottom-nav-item active">
+            <span>📊</span>
+            <span>Reports</span>
+        </a>
+        <a href="{% url 'management:staff_list' %}" class="bottom-nav-item">
+            <span>👥</span>
+            <span>Staff</span>
+        </a>
+        <a href="/admin/" class="bottom-nav-item">
+            <span>⚙️</span>
+            <span>Admin</span>
+        </a>
+    </nav>
+
+    <script>
+        // Sidebar toggle functionality
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            
+            sidebar.classList.toggle('open');
+            overlay.classList.toggle('open');
+        }
+
+        function closeSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            
+            sidebar.classList.remove('open');
+            overlay.classList.remove('open');
+        }
+
+        // Close sidebar when clicking outside on mobile
+        document.addEventListener('click', function(event) {
+            const sidebar = document.getElementById('sidebar');
+            const sidebarToggle = document.querySelector('.sidebar-toggle');
+            
+            if (window.innerWidth <= 768 && 
+                !sidebar.contains(event.target) && 
+                !sidebarToggle.contains(event.target) &&
+                sidebar.classList.contains('open')) {
+                closeSidebar();
+            }
+        });
+
+        // Close sidebar on window resize if mobile
+        window.addEventListener('resize', function() {
+            if (window.innerWidth > 768) {
+                closeSidebar();
+            }
+        });
+
+        // Custom filter functionality
+        function applyCustomFilter() {
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+            
+            if (startDate && endDate) {
+                // Add loading state
+                const applyBtn = document.querySelector('.apply-btn');
+                applyBtn.textContent = 'Loading...';
+                applyBtn.disabled = true;
+                
+                window.location.href = `?filter=custom&start_date=${startDate}&end_date=${endDate}`;
+            } else {
+                alert('Please select both start and end dates');
+            }
+        }
+
+        // Add hover effects to summary cards
+        document.querySelectorAll('.summary-card').forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-5px)';
+            });
+            
+            card.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0)';
+            });
+        });
+
+        // Add click handlers for filter buttons
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                // Add loading state
+                this.style.opacity = '0.7';
+                this.textContent = this.textContent + '...';
+            });
+        });
+
+        // Auto-refresh data every 30 seconds
+        setInterval(function() {
+            // Only refresh if no custom date range is selected
+            const currentFilter = new URLSearchParams(window.location.search).get('filter');
+            if (currentFilter && currentFilter !== 'custom') {
+                // Subtle refresh without full page reload
+                fetch(window.location.href)
+                    .then(response => response.text())
+                    .then(html => {
+                        // Update only the data sections
+                        const parser = new DOMParser();
+                        const newDoc = parser.parseFromString(html, 'text/html');
+                        
+                        // Update summary cards
+                        const newSummaryGrid = newDoc.querySelector('.summary-grid');
+                        if (newSummaryGrid) {
+                            document.querySelector('.summary-grid').innerHTML = newSummaryGrid.innerHTML;
+                        }
+                        
+                        // Update staff table
+                        const newStaffTable = newDoc.querySelector('.staff-table');
+                        if (newStaffTable) {
+                            document.querySelector('.staff-table').innerHTML = newStaffTable.innerHTML;
+                        }
+                    })
+                    .catch(error => console.log('Auto-refresh failed:', error));
+            }
+        }, 30000);
+
+        // Add real-time date display
+        function updateDateTime() {
+            const now = new Date();
+            const dateTimeString = now.toLocaleString('en-US', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+            
+            // Update page subtitle with current time
+            const subtitle = document.querySelector('.page-subtitle');
+            if (subtitle) {
+                subtitle.textContent = `Financial reports and staff summaries - Last updated: ${dateTimeString}`;
+            }
+        }
+
+        // Update time on page load and every minute
+        updateDateTime();
+        setInterval(updateDateTime, 60000);
+    </script>
+</body>
+</html>

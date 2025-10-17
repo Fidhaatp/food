@@ -1,0 +1,895 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Staff List - Manager Portal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #ff914d;
+            --accent: #6b4f3b;
+            --bg: #fffaf3;
+            --text: #333;
+            --white: #ffffff;
+            --shadow: 0 4px 20px rgba(0,0,0,0.1);
+            --shadow-light: 0 2px 10px rgba(0,0,0,0.05);
+            --transition: 0.3s ease-in-out;
+            --success: #28a745;
+            --warning: #ffc107;
+            --danger: #dc3545;
+            --info: #17a2b8;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+        }
+
+        /* Header */
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 2rem;
+            background: var(--white);
+            box-shadow: var(--shadow-light);
+            z-index: 1000;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .user-name {
+            font-weight: 600;
+            color: var(--accent);
+        }
+
+        .logout-btn {
+            background: var(--danger);
+            color: var(--white);
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 6px;
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: all var(--transition);
+        }
+
+        .logout-btn:hover {
+            background: #c82333;
+        }
+
+        /* Main Content */
+        .main {
+            padding-top: 100px;
+            min-height: 100vh;
+            padding-bottom: 100px;
+            display: flex;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 250px;
+            background: var(--white);
+            box-shadow: var(--shadow-light);
+            padding: 2rem 0;
+            position: fixed;
+            left: 0;
+            top: 100px;
+            height: calc(100vh - 100px);
+            overflow-y: auto;
+            z-index: 999;
+            transition: all var(--transition);
+        }
+
+        .sidebar-header {
+            padding: 0 2rem 1.5rem;
+            border-bottom: 1px solid #f0f0f0;
+            margin-bottom: 1rem;
+        }
+
+        .sidebar-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--accent);
+            margin-bottom: 0.5rem;
+        }
+
+        .sidebar-subtitle {
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        .sidebar-nav {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .sidebar-nav-item {
+            margin: 0;
+        }
+
+        .sidebar-nav-link {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem 2rem;
+            text-decoration: none;
+            color: var(--text);
+            transition: all var(--transition);
+            border-left: 3px solid transparent;
+        }
+
+        .sidebar-nav-link:hover {
+            background: #f8f9fa;
+            color: var(--primary);
+            border-left-color: var(--primary);
+        }
+
+        .sidebar-nav-link.active {
+            background: #fff3e0;
+            color: var(--primary);
+            border-left-color: var(--primary);
+            font-weight: 600;
+        }
+
+        .sidebar-nav-icon {
+            font-size: 1.2rem;
+            width: 20px;
+            text-align: center;
+        }
+
+        .sidebar-nav-text {
+            font-size: 0.95rem;
+        }
+
+        /* Content Area */
+        .content {
+            flex: 1;
+            margin-left: 250px;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .page-title {
+            text-align: center;
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--accent);
+            margin-bottom: 1rem;
+        }
+
+        .page-subtitle {
+            text-align: center;
+            color: var(--text);
+            margin-bottom: 3rem;
+        }
+
+        /* Search Section */
+        .search-section {
+            background: var(--white);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow-light);
+        }
+
+        .search-container {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .search-input {
+            flex: 1;
+            min-width: 250px;
+            padding: 0.75rem 1rem;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all var(--transition);
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(255, 145, 77, 0.1);
+        }
+
+        .search-btn {
+            background: var(--primary);
+            color: var(--white);
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all var(--transition);
+        }
+
+        .search-btn:hover {
+            background: #e67e22;
+        }
+
+        .clear-btn {
+            background: var(--danger);
+            color: var(--white);
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all var(--transition);
+        }
+
+        .clear-btn:hover {
+            background: #c82333;
+        }
+
+        /* Staff Table */
+        .staff-table-section {
+            background: var(--white);
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: var(--shadow-light);
+            margin-bottom: 3rem;
+            overflow-x: auto;
+        }
+
+        .table-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .table-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: var(--accent);
+        }
+
+        .table-actions {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .staff-count {
+            background: var(--primary);
+            color: var(--white);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .export-buttons {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .export-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .pdf-btn {
+            background: #dc3545;
+            color: white;
+        }
+
+        .pdf-btn:hover {
+            background: #c82333;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(220, 53, 69, 0.3);
+        }
+
+        .staff-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+
+        .staff-table th,
+        .staff-table td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+
+        .staff-table th {
+            background: var(--primary);
+            color: var(--white);
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .staff-table tr:hover {
+            background: #f8f9fa;
+        }
+
+        .staff-table tr {
+            cursor: pointer;
+            transition: all var(--transition);
+        }
+
+        .staff-table tr:hover {
+            background: #f8f9fa;
+            transform: scale(1.01);
+        }
+
+        .staff-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--primary);
+            color: var(--white);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            margin-right: 0.5rem;
+        }
+
+        .staff-info {
+            display: flex;
+            align-items: center;
+        }
+
+        .staff-name {
+            font-weight: 600;
+            color: var(--accent);
+        }
+
+        .staff-email {
+            font-size: 0.9rem;
+            color: #666;
+            margin-top: 0.25rem;
+        }
+
+        .status-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .status-active {
+            background: var(--success);
+            color: var(--white);
+        }
+
+        .status-inactive {
+            background: var(--danger);
+            color: var(--white);
+        }
+
+        .amount-cell {
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        .no-staff {
+            text-align: center;
+            color: #666;
+            padding: 3rem;
+            font-style: italic;
+        }
+
+        .no-staff-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        /* Bottom Navigation */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--white);
+            display: none;
+            justify-content: space-around;
+            padding: 0.75rem 0;
+            box-shadow: var(--shadow-light);
+            border-top-left-radius: 20px;
+            border-top-right-radius: 20px;
+            z-index: 1000;
+        }
+
+        .bottom-nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-decoration: none;
+            color: var(--text);
+            font-size: 0.8rem;
+            padding: 0.5rem;
+            transition: all var(--transition);
+            border-radius: 50%;
+        }
+
+        .bottom-nav-item.active {
+            background: var(--primary);
+            color: var(--white);
+        }
+
+        .bottom-nav-item:hover {
+            color: var(--primary);
+        }
+
+        /* Mobile Sidebar Toggle */
+        .sidebar-toggle {
+            display: none;
+            background: var(--primary);
+            color: var(--white);
+            border: none;
+            padding: 0.5rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1.2rem;
+        }
+
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 998;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header {
+                padding: 1rem;
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .sidebar-toggle {
+                display: block;
+            }
+
+            .sidebar {
+                transform: translateX(-100%);
+                width: 280px;
+            }
+
+            .sidebar.open {
+                transform: translateX(0);
+            }
+
+            .sidebar-overlay.open {
+                display: block;
+            }
+
+            .content {
+                margin-left: 0;
+                padding: 1rem;
+            }
+
+            .container {
+                padding: 0;
+            }
+
+            .page-title {
+                font-size: 2rem;
+            }
+
+            .search-container {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .search-input {
+                min-width: auto;
+            }
+
+            .staff-table {
+                font-size: 0.9rem;
+            }
+
+            .staff-table th,
+            .staff-table td {
+                padding: 0.5rem;
+            }
+
+            .staff-info {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .staff-avatar {
+                margin-bottom: 0.5rem;
+            }
+
+            .table-actions {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.5rem;
+                width: 100%;
+            }
+
+            .export-buttons {
+                width: 100%;
+            }
+
+            .export-btn {
+                justify-content: center;
+                width: 100%;
+            }
+
+            .bottom-nav {
+                display: flex;
+            }
+
+            .main {
+                padding-bottom: 100px;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .staff-table {
+                font-size: 0.8rem;
+            }
+
+            .staff-table th,
+            .staff-table td {
+                padding: 0.25rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="logo">📊 Manager Portal</div>
+        <div class="user-info">
+            <button class="sidebar-toggle" onclick="toggleSidebar()">☰</button>
+            <span class="user-name">Welcome, {{ user.username }}</span>
+            <a href="{% url 'management:logout' %}" class="logout-btn">Logout</a>
+        </div>
+    </header>
+
+    <!-- Sidebar Overlay -->
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-title">Management</div>
+            <div class="sidebar-subtitle">Navigation Menu</div>
+        </div>
+        <nav>
+            <ul class="sidebar-nav">
+                <li class="sidebar-nav-item">
+                    <a href="{% url 'management:home' %}" class="sidebar-nav-link">
+                        <span class="sidebar-nav-icon">🏠</span>
+                        <span class="sidebar-nav-text">Dashboard</span>
+                    </a>
+                </li>
+                <li class="sidebar-nav-item">
+                    <a href="{% url 'management:bill_report' %}" class="sidebar-nav-link">
+                        <span class="sidebar-nav-icon">📊</span>
+                        <span class="sidebar-nav-text">Bill Reports</span>
+                    </a>
+                </li>
+                <li class="sidebar-nav-item">
+                    <a href="{% url 'management:staff_list' %}" class="sidebar-nav-link active">
+                        <span class="sidebar-nav-icon">👥</span>
+                        <span class="sidebar-nav-text">Staff Management</span>
+                    </a>
+                </li>
+                <li class="sidebar-nav-item">
+                    <a href="/admin/" class="sidebar-nav-link">
+                        <span class="sidebar-nav-icon">⚙️</span>
+                        <span class="sidebar-nav-text">Admin Panel</span>
+                    </a>
+                </li>
+                <li class="sidebar-nav-item">
+                    <a href="{% url 'orders:home' %}" class="sidebar-nav-link">
+                        <span class="sidebar-nav-icon">🍽️</span>
+                        <span class="sidebar-nav-text">Orders Portal</span>
+                    </a>
+                </li>
+                <li class="sidebar-nav-item">
+                    <a href="{% url 'kitchen:home' %}" class="sidebar-nav-link">
+                        <span class="sidebar-nav-icon">👨‍🍳</span>
+                        <span class="sidebar-nav-text">Kitchen Portal</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main">
+        <div class="content">
+            <div class="container">
+            <h1 class="page-title">Staff List</h1>
+            <p class="page-subtitle">Manage and view staff information</p>
+
+            <!-- Search Section -->
+            <div class="search-section">
+                <div class="search-container">
+                    <input type="text" 
+                           class="search-input" 
+                           id="searchInput" 
+                           placeholder="Search by name, email, or phone number..."
+                           value="{{ search_query|default:'' }}">
+                    <button class="search-btn" onclick="performSearch()">
+                        🔍 Search
+                    </button>
+                    <button class="clear-btn" onclick="clearSearch()">
+                        ✕ Clear
+                    </button>
+                </div>
+            </div>
+
+            <!-- Staff Table -->
+            <div class="staff-table-section">
+                <div class="table-header">
+                    <h2 class="table-title">Staff Members</h2>
+                    <div class="table-actions">
+                        <div class="staff-count" id="staffCount">
+                            {{ staff_data|length }} Staff Member{{ staff_data|length|pluralize }}
+                        </div>
+                        <div class="export-buttons">
+                            <a href="{% url 'management:export_staff_pdf' %}" class="export-btn pdf-btn">
+                                📄 Export PDF
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                {% if staff_data %}
+                <table class="staff-table" id="staffTable">
+                    <thead>
+                        <tr>
+                            <th>Staff Member</th>
+                            <th>Status</th>
+                            <th>Total Days</th>
+                            <th>Total Amount</th>
+                            <th>Completed</th>
+                            <th>Pending</th>
+                            <th>Balance</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for staff in staff_data %}
+                        <tr onclick="viewStaffDetail({{ staff.user.id }})" data-staff-name="{{ staff.user.first_name|default:staff.user.username|lower }}" data-staff-email="{{ staff.user.email|lower }}" data-staff-phone="{{ staff.user.profile.phone_number|default:''|lower }}">
+                            <td>
+                                <div class="staff-info">
+                                    <div class="staff-avatar">
+                                        {{ staff.user.first_name|first|default:staff.user.username|first|upper }}
+                                    </div>
+                                    <div>
+                                        <div class="staff-name">{{ staff.user.first_name|default:staff.user.username }}</div>
+                                        <div class="staff-email">{{ staff.user.email }}</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="status-badge {% if staff.user.profile.is_active %}status-active{% else %}status-inactive{% endif %}">
+                                    {% if staff.user.profile.is_active %}Active{% else %}Inactive{% endif %}
+                                </span>
+                            </td>
+                            <td>{{ staff.total_days }}</td>
+                            <td class="amount-cell">₹{{ staff.total_amount|floatformat:0 }}</td>
+                            <td class="amount-cell">₹{{ staff.completed_amount|floatformat:0 }}</td>
+                            <td class="amount-cell">₹{{ staff.pending_amount|floatformat:0 }}</td>
+                            <td class="amount-cell">₹{{ staff.balance|floatformat:0 }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}
+                <div class="no-staff">
+                    <div class="no-staff-icon">👥</div>
+                    <h3>No Staff Found</h3>
+                    <p>No staff members are registered in the system</p>
+                </div>
+                {% endif %}
+            </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Bottom Navigation -->
+    <nav class="bottom-nav">
+        <a href="{% url 'management:home' %}" class="bottom-nav-item">
+            <span>🏠</span>
+            <span>Dashboard</span>
+        </a>
+        <a href="{% url 'management:bill_report' %}" class="bottom-nav-item">
+            <span>📊</span>
+            <span>Reports</span>
+        </a>
+        <a href="{% url 'management:staff_list' %}" class="bottom-nav-item active">
+            <span>👥</span>
+            <span>Staff</span>
+        </a>
+        <a href="/admin/" class="bottom-nav-item">
+            <span>⚙️</span>
+            <span>Admin</span>
+        </a>
+    </nav>
+
+    <script>
+        // Sidebar toggle functionality
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            
+            sidebar.classList.toggle('open');
+            overlay.classList.toggle('open');
+        }
+
+        function closeSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            
+            sidebar.classList.remove('open');
+            overlay.classList.remove('open');
+        }
+
+        // Close sidebar when clicking outside on mobile
+        document.addEventListener('click', function(event) {
+            const sidebar = document.getElementById('sidebar');
+            const sidebarToggle = document.querySelector('.sidebar-toggle');
+            
+            if (window.innerWidth <= 768 && 
+                !sidebar.contains(event.target) && 
+                !sidebarToggle.contains(event.target) &&
+                sidebar.classList.contains('open')) {
+                closeSidebar();
+            }
+        });
+
+        // Close sidebar on window resize if mobile
+        window.addEventListener('resize', function() {
+            if (window.innerWidth > 768) {
+                closeSidebar();
+            }
+        });
+
+        // Search functionality
+        function performSearch() {
+            const searchInput = document.getElementById('searchInput');
+            const searchQuery = searchInput.value.trim().toLowerCase();
+            
+            if (searchQuery) {
+                // Filter table rows
+                filterTableRows(searchQuery);
+            } else {
+                // Show all rows
+                showAllRows();
+            }
+        }
+
+        function clearSearch() {
+            document.getElementById('searchInput').value = '';
+            showAllRows();
+        }
+
+        function filterTableRows(searchQuery) {
+            const table = document.getElementById('staffTable');
+            const rows = table.querySelectorAll('tbody tr');
+            let visibleCount = 0;
+
+            rows.forEach(row => {
+                const staffName = row.dataset.staffName || '';
+                const staffEmail = row.dataset.staffEmail || '';
+                const staffPhone = row.dataset.staffPhone || '';
+                
+                if (staffName.includes(searchQuery) || 
+                    staffEmail.includes(searchQuery) || 
+                    staffPhone.includes(searchQuery)) {
+                    row.style.display = '';
+                    visibleCount++;
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+
+            // Update staff count
+            document.getElementById('staffCount').textContent = 
+                `${visibleCount} Staff Member${visibleCount !== 1 ? 's' : ''}`;
+        }
+
+        function showAllRows() {
+            const table = document.getElementById('staffTable');
+            const rows = table.querySelectorAll('tbody tr');
+            
+            rows.forEach(row => {
+                row.style.display = '';
+            });
+
+            // Update staff count
+            document.getElementById('staffCount').textContent = 
+                `${rows.length} Staff Member${rows.length !== 1 ? 's' : ''}`;
+        }
+
+        // View staff detail
+        function viewStaffDetail(userId) {
+            window.location.href = `{% url 'management:member_detail' 0 %}`.replace('0', userId);
+        }
+
+        // Real-time search
+        document.getElementById('searchInput').addEventListener('input', function() {
+            const searchQuery = this.value.trim().toLowerCase();
+            
+            if (searchQuery.length > 0) {
+                filterTableRows(searchQuery);
+            } else {
+                showAllRows();
+            }
+        });
+
+        // Add hover effects to table rows
+        document.querySelectorAll('.staff-table tbody tr').forEach(row => {
+            row.addEventListener('mouseenter', function() {
+                this.style.backgroundColor = '#f8f9fa';
+                this.style.transform = 'scale(1.01)';
+            });
+            
+            row.addEventListener('mouseleave', function() {
+                this.style.backgroundColor = '';
+                this.style.transform = 'scale(1)';
+            });
+        });
+
+        // Add click handlers for table rows
+        document.querySelectorAll('.staff-table tbody tr').forEach(row => {
+            row.addEventListener('click', function() {
+                // Add loading state
+                this.style.opacity = '0.7';
+            });
+        });
+    </script>
+</body>
+</html>

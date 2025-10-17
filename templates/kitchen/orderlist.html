@@ -1,0 +1,300 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kitchen Dashboard - Food Management System</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #ff914d;
+            --accent: #6b4f3b;
+            --bg: #fffaf3;
+            --text: #333;
+            --white: #ffffff;
+            --shadow: 0 4px 20px rgba(0,0,0,0.1);
+            --shadow-light: 0 2px 10px rgba(0,0,0,0.05);
+            --transition: 0.3s ease-in-out;
+            --success: #28a745;
+            --warning: #ffc107;
+            --danger: #dc3545;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+        }
+
+        /* Header */
+        .header {
+            background: var(--white);
+            box-shadow: var(--shadow-light);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .user-name {
+            font-weight: 600;
+            color: var(--accent);
+        }
+
+        .logout-btn {
+            background: var(--danger);
+            color: var(--white);
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 6px;
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: all var(--transition);
+        }
+
+        .logout-btn:hover {
+            background: #c82333;
+        }
+
+        /* Main Content */
+        .main {
+            padding: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .page-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--accent);
+            margin-bottom: 0.5rem;
+            text-align: center;
+        }
+
+        .page-subtitle {
+            text-align: center;
+            color: var(--text);
+            margin-bottom: 3rem;
+            font-size: 1.1rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+        }
+
+        .stat-card {
+            background: var(--white);
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: var(--shadow-light);
+            text-align: center;
+            transition: all var(--transition);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow);
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            color: var(--text);
+            font-weight: 500;
+        }
+
+        /* Categories Grid */
+        .categories-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .category-card {
+            background: var(--white);
+            border-radius: 16px;
+            box-shadow: var(--shadow-light);
+            overflow: hidden;
+            transition: all var(--transition);
+        }
+
+        .category-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow);
+        }
+
+        .category-header {
+            background: var(--primary);
+            color: var(--white);
+            padding: 1.5rem;
+            text-align: center;
+        }
+
+        .category-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .category-count {
+            font-size: 2rem;
+            font-weight: 700;
+        }
+
+        .orders-list {
+            padding: 1.5rem;
+        }
+
+        .order-item {
+            padding: 0.8rem 1rem;
+            border-bottom: 1px solid #eee;
+            transition: all var(--transition);
+        }
+
+        .order-item:last-child {
+            border-bottom: none;
+        }
+
+        .order-item:hover {
+            background: #f8f9fa;
+        }
+
+        .order-user {
+            font-weight: 600;
+            color: var(--accent);
+            font-size: 1rem;
+        }
+
+
+        .no-orders {
+            text-align: center;
+            color: #666;
+            padding: 2rem;
+            font-style: italic;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header {
+                padding: 1rem;
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .main {
+                padding: 1rem;
+            }
+
+            .page-title {
+                font-size: 2rem;
+            }
+
+            .categories-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="logo">👨‍🍳 Kitchen Dashboard</div>
+        <div class="user-info">
+            <span class="user-name">Welcome, {{ user.username }}</span>
+            <a href="{% url 'kitchen:logout' %}" class="logout-btn">Logout</a>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main">
+        <h1 class="page-title">Today's Orders</h1>
+        <p class="page-subtitle">{{ today|date:"F d, Y" }}</p>
+
+        <!-- Statistics -->
+        <div class="stats-grid">
+            {% for category_data in categories_with_orders %}
+            <div class="stat-card">
+                <div class="stat-number">{{ category_data.count }}</div>
+                <div class="stat-label">{{ category_data.category.name }}</div>
+            </div>
+            {% empty %}
+            <div class="stat-card">
+                <div class="stat-number">0</div>
+                <div class="stat-label">No Orders Today</div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Categories with Orders -->
+        <div class="categories-grid">
+            {% for category_data in categories_with_orders %}
+            <div class="category-card">
+                <div class="category-header">
+                    <div class="category-title">{{ category_data.category.name }}</div>
+                    <div class="category-count">{{ category_data.count }} total orders</div>
+                </div>
+                <div class="orders-list">
+                    {% if category_data.orders %}
+                        {% for order in category_data.orders %}
+                        <div class="order-item">
+                            <div class="order-user">{{ order.user.first_name|default:order.user.username }}</div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="no-orders">No orders for this category</div>
+                    {% endif %}
+                </div>
+            </div>
+            {% empty %}
+            <div class="no-orders" style="grid-column: 1 / -1; padding: 3rem;">
+                <h3>No orders for today</h3>
+                <p>Check back later for new orders!</p>
+            </div>
+            {% endfor %}
+        </div>
+    </main>
+
+    <script>
+        // Auto-refresh every 30 seconds
+        setInterval(() => {
+            location.reload();
+        }, 30000);
+    </script>
+</body>
+</html>
