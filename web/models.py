@@ -99,6 +99,53 @@ class BillReport(models.Model):
         ordering = ['-date']
 
 
+class MenuTimeSlot(models.Model):
+    """Model for managing menu availability time slots"""
+    name = models.CharField(max_length=100, help_text="Name for this time slot (e.g., 'Morning Menu', 'Lunch Menu')")
+    start_date = models.DateField(help_text="Start date for menu availability")
+    end_date = models.DateField(help_text="End date for menu availability")
+    start_time = models.TimeField(help_text="Start time for menu availability")
+    end_time = models.TimeField(help_text="End time for menu availability")
+    is_active = models.BooleanField(default=True, help_text="Whether this time slot is currently active")
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.name} ({self.start_date} to {self.end_date}) - {self.start_time} to {self.end_time}"
+
+    class Meta:
+        verbose_name = "Menu Time Slot"
+        verbose_name_plural = "Menu Time Slots"
+        ordering = ['-created_at']
+
+    def is_currently_available(self):
+        """Check if the current time is within the time slot"""
+        from django.utils import timezone as django_timezone
+        import pytz
+        
+        # Get current time in local timezone
+        local_tz = pytz.timezone('Asia/Kolkata')
+        now = django_timezone.now().astimezone(local_tz)
+        current_date = now.date()
+        current_time = now.time()
+        
+        # Check if current date is within the date range
+        if not (self.start_date <= current_date <= self.end_date):
+            return False
+        
+        # Check if current time is within the time range
+        if not (self.start_time <= current_time <= self.end_time):
+            return False
+            
+        return self.is_active
+
+    def is_available_on_date(self, date):
+        """Check if menu is available on a specific date"""
+        if not (self.start_date <= date <= self.end_date):
+            return False
+        return self.is_active
+
+
 class UserProfile(models.Model):
     ROLE_CHOICES = [
         ('staff', 'Staff'),

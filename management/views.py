@@ -6,7 +6,7 @@ from django.http import JsonResponse, HttpResponse
 from django.utils import timezone
 from django.db.models import Sum, Count, Q
 from django.contrib.auth.models import User
-from web.models import Category, Order, UserProfile, BillReport
+from web.models import Category, Order, UserProfile, BillReport, MenuTimeSlot
 import json
 from datetime import datetime, timedelta
 from reportlab.lib.pagesizes import letter, A4
@@ -14,6 +14,16 @@ from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, 
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib import colors
 from reportlab.lib.units import inch
+from functools import wraps
+
+def management_login_required(view_func):
+    """Custom decorator for management authentication"""
+    @wraps(view_func)
+    def wrapper(request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return redirect('management:login')
+        return view_func(request, *args, **kwargs)
+    return wrapper
 
 def register(request):
     """Manager registration page"""
@@ -73,13 +83,13 @@ def manager_login(request):
     
     return render(request, 'management/login.html')
 
-@login_required
+@management_login_required
 def manager_logout(request):
     """Logout manager user"""
     logout(request)
     return redirect('management:login')
 
-@login_required
+@management_login_required
 def home(request):
     """Manager home page with dashboard metrics"""
     if not hasattr(request.user, 'profile') or request.user.profile.role != 'manager':
@@ -119,7 +129,7 @@ def home(request):
     }
     return render(request, 'management/home.html', context)
 
-@login_required
+@management_login_required
 def bill_report(request):
     """Bill report page with filters"""
     if not hasattr(request.user, 'profile') or request.user.profile.role != 'manager':
@@ -193,7 +203,7 @@ def bill_report(request):
     }
     return render(request, 'management/bill_report.html', context)
 
-@login_required
+@management_login_required
 def staff_list(request):
     """Staff list page"""
     if not hasattr(request.user, 'profile') or request.user.profile.role != 'manager':
@@ -243,7 +253,7 @@ def staff_list(request):
     }
     return render(request, 'management/staff_list.html', context)
 
-@login_required
+@management_login_required
 def member_detail(request, user_id):
     """Individual staff member detail page"""
     if not hasattr(request.user, 'profile') or request.user.profile.role != 'manager':
@@ -272,7 +282,7 @@ def member_detail(request, user_id):
     return render(request, 'management/member_detail.html', context)
 
 # API Views
-@login_required
+@management_login_required
 def get_bill_data(request):
     """API endpoint to get bill data"""
     if not hasattr(request.user, 'profile') or request.user.profile.role != 'manager':
@@ -315,7 +325,7 @@ def get_bill_data(request):
         'end_date': end_date.isoformat(),
     })
 
-@login_required
+@management_login_required
 def get_staff_data(request):
     """API endpoint to get staff data"""
     if not hasattr(request.user, 'profile') or request.user.profile.role != 'manager':
@@ -347,7 +357,7 @@ def get_staff_data(request):
     
     return JsonResponse({'staff_data': staff_data})
 
-@login_required
+@management_login_required
 def update_payment(request):
     """API endpoint to update payment status"""
     if not hasattr(request.user, 'profile') or request.user.profile.role != 'manager':
@@ -438,7 +448,7 @@ def update_payment(request):
     
     return JsonResponse({'error': 'Invalid request method'}, status=405)
 
-@login_required
+@management_login_required
 def export_staff_pdf(request):
     """Export staff list to PDF"""
     if not hasattr(request.user, 'profile') or request.user.profile.role != 'manager':
@@ -590,7 +600,7 @@ def export_staff_pdf(request):
     doc.build(story)
     return response
 
-@login_required
+@management_login_required
 def export_member_pdf(request, user_id):
     """Export member detail to PDF"""
     if not hasattr(request.user, 'profile') or request.user.profile.role != 'manager':
@@ -723,3 +733,459 @@ def export_member_pdf(request, user_id):
     # Build PDF
     doc.build(story)
     return response
+
+
+@management_login_required
+def order_management(request):
+    """Order management page with calendar filtering"""
+    if not hasattr(request.user, 'profile') or request.user.profile.role != 'manager':
+        return redirect('management:login')
+    
+    # Get date filter from request
+    selected_date = request.GET.get('date')
+    if selected_date:
+        try:
+            selected_date = datetime.strptime(selected_date, '%Y-%m-%d').date()
+        except ValueError:
+            selected_date = timezone.now().date()
+    else:
+        selected_date = timezone.now().date()
+    
+    # Get orders for selected date
+    orders = Order.objects.filter(date=selected_date).select_related('user', 'category').order_by('user__first_name', 'user__last_name')
+    
+    # Group orders by user
+    orders_by_user = {}
+    for order in orders:
+        user_key = order.user.id
+        if user_key not in orders_by_user:
+            orders_by_user[user_key] = {
+                'user': order.user,
+                'orders': [],
+                'total_amount': 0
+            }
+        orders_by_user[user_key]['orders'].append(order)
+        orders_by_user[user_key]['total_amount'] += order.price
+    
+    # Get date range for calendar
+    start_date = selected_date - timedelta(days=30)
+    end_date = selected_date + timedelta(days=30)
+    
+    # Get dates with orders for calendar highlighting
+    dates_with_orders = Order.objects.filter(
+        date__range=[start_date, end_date]
+    ).values_list('date', flat=True).distinct()
+    
+    context = {
+        'selected_date': selected_date,
+        'orders_by_user': orders_by_user,
+        'dates_with_orders': list(dates_with_orders),
+        'start_date': start_date,
+        'end_date': end_date,
+    }
+    
+    return render(request, 'management/order_detail.html', context)
+
+
+@management_login_required
+def get_orders_by_date(request):
+    """API endpoint to get orders by date"""
+    if not hasattr(request.user, 'profile') or request.user.profile.role != 'manager':
+        return JsonResponse({'error': 'Access denied'}, status=403)
+    
+    date_str = request.GET.get('date')
+    if not date_str:
+        return JsonResponse({'error': 'Date parameter required'}, status=400)
+    
+    try:
+        selected_date = datetime.strptime(date_str, '%Y-%m-%d').date()
+    except ValueError:
+        return JsonResponse({'error': 'Invalid date format'}, status=400)
+    
+    orders = Order.objects.filter(date=selected_date).select_related('user', 'category').order_by('user__first_name', 'user__last_name')
+    
+    # Group orders by user
+    orders_by_user = {}
+    for order in orders:
+        user_key = order.user.id
+        if user_key not in orders_by_user:
+            orders_by_user[user_key] = {
+                'user': {
+                    'id': order.user.id,
+                    'first_name': order.user.first_name or order.user.username,
+                    'last_name': order.user.last_name or '',
+                    'username': order.user.username
+                },
+                'orders': [],
+                'total_amount': 0
+            }
+        orders_by_user[user_key]['orders'].append({
+            'id': order.id,
+            'category': order.category.name,
+            'price': float(order.price),
+            'status': order.status
+        })
+        orders_by_user[user_key]['total_amount'] += order.price
+    
+    return JsonResponse({
+        'orders_by_user': orders_by_user,
+        'date': selected_date.strftime('%Y-%m-%d')
+    })
+
+
+@management_login_required
+def delete_orders(request):
+    """Delete selected orders and recalculate payments"""
+    if not hasattr(request.user, 'profile') or request.user.profile.role != 'manager':
+        return JsonResponse({'error': 'Access denied'}, status=403)
+    
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            order_ids = data.get('order_ids', [])
+            date = data.get('date')
+            
+            if not order_ids:
+                return JsonResponse({'error': 'No orders selected'}, status=400)
+            
+            if not date:
+                return JsonResponse({'error': 'Date required'}, status=400)
+            
+            # Get orders to delete
+            orders_to_delete = Order.objects.filter(id__in=order_ids, date=date)
+            
+            if not orders_to_delete.exists():
+                return JsonResponse({'error': 'No orders found'}, status=404)
+            
+            # Get affected users
+            affected_users = orders_to_delete.values_list('user', flat=True).distinct()
+            
+            # Delete orders
+            deleted_count = orders_to_delete.count()
+            orders_to_delete.delete()
+            
+            # Recalculate BillReport for affected users
+            for user_id in affected_users:
+                user = User.objects.get(id=user_id)
+                
+                # Get remaining orders for this user on this date
+                remaining_orders = Order.objects.filter(user=user, date=date)
+                total_amount = remaining_orders.aggregate(Sum('price'))['price__sum'] or 0
+                completed_amount = remaining_orders.filter(status='completed').aggregate(Sum('price'))['price__sum'] or 0
+                pending_amount = total_amount - completed_amount
+                
+                # Update or create BillReport
+                bill_report, created = BillReport.objects.get_or_create(
+                    user=user,
+                    date=date,
+                    defaults={
+                        'completed_amount': completed_amount,
+                        'pending_amount': pending_amount,
+                        'balance': pending_amount
+                    }
+                )
+                
+                if not created:
+                    bill_report.completed_amount = completed_amount
+                    bill_report.pending_amount = pending_amount
+                    bill_report.balance = pending_amount
+                    bill_report.save()
+            
+            return JsonResponse({
+                'success': True,
+                'message': f'Successfully deleted {deleted_count} orders',
+                'deleted_count': deleted_count
+            })
+            
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=400)
+    
+    return JsonResponse({'error': 'Invalid request method'}, status=405)
+
+
+@management_login_required
+def order_detail(request):
+    """Order detail page with calendar, search, and daily member list"""
+    if not hasattr(request.user, 'profile') or request.user.profile.role != 'manager':
+        messages.error(request, 'Access denied.')
+        return redirect('management:login')
+    
+    # Get filters from request
+    selected_date = request.GET.get('date')
+    search_query = request.GET.get('search', '').strip()
+    
+    if selected_date:
+        try:
+            selected_date = datetime.strptime(selected_date, '%Y-%m-%d').date()
+        except ValueError:
+            selected_date = timezone.now().date()
+    else:
+        selected_date = timezone.now().date()
+    
+    # Get orders for selected date
+    orders = Order.objects.filter(date=selected_date).select_related('user', 'category').order_by('user__first_name', 'user__last_name')
+    
+    # Apply search filter if provided
+    if search_query:
+        orders = orders.filter(
+            Q(user__first_name__icontains=search_query) |
+            Q(user__last_name__icontains=search_query) |
+            Q(user__username__icontains=search_query) |
+            Q(category__name__icontains=search_query)
+        )
+    
+    # Group orders by user
+    orders_by_user = {}
+    total_amount = 0
+    total_orders = 0
+    categories_ordered = set()
+    
+    for order in orders:
+        user_key = order.user.id
+        if user_key not in orders_by_user:
+            orders_by_user[user_key] = {
+                'user': order.user,
+                'orders': [],
+                'total_amount': 0,
+                'completed_amount': 0,
+                'pending_amount': 0,
+                'categories': set()
+            }
+        orders_by_user[user_key]['orders'].append(order)
+        orders_by_user[user_key]['total_amount'] += order.price
+        orders_by_user[user_key]['categories'].add(order.category.name)
+        categories_ordered.add(order.category.name)
+        total_amount += order.price
+        total_orders += 1
+        
+        # Calculate completed and pending amounts
+        if order.status == 'completed':
+            orders_by_user[user_key]['completed_amount'] += order.price
+        else:
+            orders_by_user[user_key]['pending_amount'] += order.price
+    
+    # Convert sets to lists for template
+    for user_data in orders_by_user.values():
+        user_data['categories'] = list(user_data['categories'])
+    
+    # Get date range for calendar (current month)
+    today = timezone.now().date()
+    start_date = today.replace(day=1)
+    if start_date.month == 12:
+        end_date = start_date.replace(year=start_date.year + 1, month=1) - timedelta(days=1)
+    else:
+        end_date = start_date.replace(month=start_date.month + 1) - timedelta(days=1)
+    
+    # Get dates with orders for calendar highlighting
+    dates_with_orders = Order.objects.filter(
+        date__range=[start_date, end_date]
+    ).values_list('date', flat=True).distinct()
+    
+    # Get unique members count
+    unique_members = len(orders_by_user)
+    
+    # Get today's orders for quick overview
+    today_orders = Order.objects.filter(date=today).select_related('user', 'category')
+    today_staff = {}
+    today_categories = set()
+    
+    for order in today_orders:
+        user_key = order.user.id
+        if user_key not in today_staff:
+            today_staff[user_key] = {
+                'user': order.user,
+                'categories': set(),
+                'total_amount': 0
+            }
+        today_staff[user_key]['categories'].add(order.category.name)
+        today_staff[user_key]['total_amount'] += order.price
+        today_categories.add(order.category.name)
+    
+    # Convert sets to lists for template
+    for staff_data in today_staff.values():
+        staff_data['categories'] = list(staff_data['categories'])
+    
+    context = {
+        'selected_date': selected_date,
+        'search_query': search_query,
+        'orders_by_user': orders_by_user,
+        'dates_with_orders': list(dates_with_orders),
+        'start_date': start_date,
+        'end_date': end_date,
+        'total_amount': total_amount,
+        'total_orders': total_orders,
+        'unique_members': unique_members,
+        'categories_ordered': list(categories_ordered),
+        'today': today,
+        'today_staff': today_staff,
+        'today_categories': list(today_categories),
+    }
+    
+    return render(request, 'management/order_detail.html', context)
+
+
+@management_login_required
+def time_slot_management(request):
+    """Time slot management page"""
+    if not hasattr(request.user, 'profile') or request.user.profile.role != 'manager':
+        messages.error(request, 'Access denied.')
+        return redirect('management:login')
+    
+    time_slots = MenuTimeSlot.objects.all().order_by('-created_at')
+    
+    context = {
+        'time_slots': time_slots,
+    }
+    
+    return render(request, 'management/time_slot_management.html', context)
+
+
+@management_login_required
+def create_time_slot(request):
+    """Create new time slot"""
+    if not hasattr(request.user, 'profile') or request.user.profile.role != 'manager':
+        return JsonResponse({'error': 'Access denied'}, status=403)
+    
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            name = data.get('name')
+            start_date = data.get('start_date')
+            end_date = data.get('end_date')
+            start_time = data.get('start_time')
+            end_time = data.get('end_time')
+            is_active = data.get('is_active', True)
+            
+            if not all([name, start_date, end_date, start_time, end_time]):
+                return JsonResponse({'error': 'All fields are required'}, status=400)
+            
+            # Validate date range
+            start_date_obj = datetime.strptime(start_date, '%Y-%m-%d').date()
+            end_date_obj = datetime.strptime(end_date, '%Y-%m-%d').date()
+            
+            if start_date_obj > end_date_obj:
+                return JsonResponse({'error': 'Start date cannot be after end date'}, status=400)
+            
+            # Validate time range
+            start_time_obj = datetime.strptime(start_time, '%H:%M').time()
+            end_time_obj = datetime.strptime(end_time, '%H:%M').time()
+            
+            if start_time_obj >= end_time_obj:
+                return JsonResponse({'error': 'Start time must be before end time'}, status=400)
+            
+            # Create time slot
+            time_slot = MenuTimeSlot.objects.create(
+                name=name,
+                start_date=start_date_obj,
+                end_date=end_date_obj,
+                start_time=start_time_obj,
+                end_time=end_time_obj,
+                is_active=is_active
+            )
+            
+            return JsonResponse({
+                'success': True,
+                'message': 'Time slot created successfully',
+                'time_slot': {
+                    'id': time_slot.id,
+                    'name': time_slot.name,
+                    'start_date': time_slot.start_date.strftime('%Y-%m-%d'),
+                    'end_date': time_slot.end_date.strftime('%Y-%m-%d'),
+                    'start_time': time_slot.start_time.strftime('%H:%M'),
+                    'end_time': time_slot.end_time.strftime('%H:%M'),
+                    'is_active': time_slot.is_active
+                }
+            })
+            
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=400)
+    
+    return JsonResponse({'error': 'Invalid request method'}, status=405)
+
+
+@management_login_required
+def update_time_slot(request, slot_id):
+    """Update time slot"""
+    if not hasattr(request.user, 'profile') or request.user.profile.role != 'manager':
+        return JsonResponse({'error': 'Access denied'}, status=403)
+    
+    try:
+        time_slot = MenuTimeSlot.objects.get(id=slot_id)
+    except MenuTimeSlot.DoesNotExist:
+        return JsonResponse({'error': 'Time slot not found'}, status=404)
+    
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            name = data.get('name')
+            start_date = data.get('start_date')
+            end_date = data.get('end_date')
+            start_time = data.get('start_time')
+            end_time = data.get('end_time')
+            is_active = data.get('is_active')
+            
+            if not all([name, start_date, end_date, start_time, end_time]):
+                return JsonResponse({'error': 'All fields are required'}, status=400)
+            
+            # Validate date range
+            start_date_obj = datetime.strptime(start_date, '%Y-%m-%d').date()
+            end_date_obj = datetime.strptime(end_date, '%Y-%m-%d').date()
+            
+            if start_date_obj > end_date_obj:
+                return JsonResponse({'error': 'Start date cannot be after end date'}, status=400)
+            
+            # Validate time range
+            start_time_obj = datetime.strptime(start_time, '%H:%M').time()
+            end_time_obj = datetime.strptime(end_time, '%H:%M').time()
+            
+            if start_time_obj >= end_time_obj:
+                return JsonResponse({'error': 'Start time must be before end time'}, status=400)
+            
+            # Update time slot
+            time_slot.name = name
+            time_slot.start_date = start_date_obj
+            time_slot.end_date = end_date_obj
+            time_slot.start_time = start_time_obj
+            time_slot.end_time = end_time_obj
+            time_slot.is_active = is_active
+            time_slot.save()
+            
+            return JsonResponse({
+                'success': True,
+                'message': 'Time slot updated successfully',
+                'time_slot': {
+                    'id': time_slot.id,
+                    'name': time_slot.name,
+                    'start_date': time_slot.start_date.strftime('%Y-%m-%d'),
+                    'end_date': time_slot.end_date.strftime('%Y-%m-%d'),
+                    'start_time': time_slot.start_time.strftime('%H:%M'),
+                    'end_time': time_slot.end_time.strftime('%H:%M'),
+                    'is_active': time_slot.is_active
+                }
+            })
+            
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=400)
+    
+    return JsonResponse({'error': 'Invalid request method'}, status=405)
+
+
+@management_login_required
+def delete_time_slot(request, slot_id):
+    """Delete time slot"""
+    if not hasattr(request.user, 'profile') or request.user.profile.role != 'manager':
+        return JsonResponse({'error': 'Access denied'}, status=403)
+    
+    try:
+        time_slot = MenuTimeSlot.objects.get(id=slot_id)
+        time_slot.delete()
+        
+        return JsonResponse({
+            'success': True,
+            'message': 'Time slot deleted successfully'
+        })
+        
+    except MenuTimeSlot.DoesNotExist:
+        return JsonResponse({'error': 'Time slot not found'}, status=404)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=400)

@@ -6,7 +6,7 @@ from django.http import JsonResponse
 from django.utils import timezone
 from django.db.models import Sum, Count
 from django.contrib.auth.models import User
-from web.models import Category, Menu, Order, UserProfile, BillReport
+from web.models import Category, Menu, Order, UserProfile, BillReport, MenuTimeSlot
 import json
 
 def register(request):
@@ -110,6 +110,37 @@ def menu(request):
         messages.error(request, 'Access denied.')
         return redirect('orders:login')
     
+    # Check if menu is currently available based on time slots
+    from django.utils import timezone as django_timezone
+    import pytz
+    
+    # Get current time in local timezone
+    local_tz = pytz.timezone('Asia/Kolkata')
+    now = django_timezone.now().astimezone(local_tz)
+    current_date = now.date()
+    current_time = now.time()
+    
+    # Get active time slots for today
+    active_time_slots = MenuTimeSlot.objects.filter(
+        is_active=True,
+        start_date__lte=current_date,
+        end_date__gte=current_date
+    )
+    
+    is_menu_available = False
+    current_time_slot = None
+    
+    # Check if current date is within any active time slot's date range
+    # and current time is within the time slot's time range
+    for time_slot in active_time_slots:
+        # Check if current date is within the date range
+        if time_slot.start_date <= current_date <= time_slot.end_date:
+            # Check if current time is within the time range
+            if time_slot.start_time <= current_time <= time_slot.end_time:
+                is_menu_available = True
+                current_time_slot = time_slot
+                break
+    
     # Get available categories (not locked and have menu items)
     categories = Category.objects.filter(
         is_locked=False
@@ -126,6 +157,10 @@ def menu(request):
         'categories': categories,
         'today_orders': today_orders,
         'today': today,
+        'is_menu_available': is_menu_available,
+        'current_time_slot': current_time_slot,
+        'active_time_slots': active_time_slots,
+        'current_time': current_time,
     }
     return render(request, 'orders/menu.html', context)
 
@@ -240,6 +275,37 @@ def place_order(request):
         try:
             data = json.loads(request.body)
             category_id = data.get('category_id')
+            
+            # Check if menu is currently available based on time slots
+            from django.utils import timezone as django_timezone
+            import pytz
+            
+            # Get current time in local timezone
+            local_tz = pytz.timezone('Asia/Kolkata')
+            now = django_timezone.now().astimezone(local_tz)
+            current_date = now.date()
+            current_time = now.time()
+            
+            # Get active time slots for today
+            active_time_slots = MenuTimeSlot.objects.filter(
+                is_active=True,
+                start_date__lte=current_date,
+                end_date__gte=current_date
+            )
+            
+            is_menu_available = False
+            # Check if current date is within any active time slot's date range
+            # and current time is within the time slot's time range
+            for time_slot in active_time_slots:
+                # Check if current date is within the date range
+                if time_slot.start_date <= current_date <= time_slot.end_date:
+                    # Check if current time is within the time range
+                    if time_slot.start_time <= current_time <= time_slot.end_time:
+                        is_menu_available = True
+                        break
+            
+            if not is_menu_available:
+                return JsonResponse({'error': 'Menu ordering is not available at this time'}, status=400)
             
             category = Category.objects.get(id=category_id)
             

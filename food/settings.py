@@ -136,6 +136,7 @@ DATETIME_INPUT_FORMATS = (
     "%Y-%m-%d",
 )
 
+
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
 
@@ -151,3 +152,8 @@ STATIC_ROOT = BASE_DIR / "assets"
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Authentication settings
+# LOGIN_URL = '/management/login/'  # Let each app handle its own login
+LOGIN_REDIRECT_URL = '/'
+LOGOUT_REDIRECT_URL = '/'
