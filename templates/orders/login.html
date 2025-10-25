@@ -290,13 +290,18 @@
         }
 
         /* Responsive */
+
         @media (max-width: 1024px) {
             .top-nav {
                 display: none;
             }
 
             .header {
-                padding: 5rem 1rem 2.5rem;
+                display: none; /* Hide header on mobile */
+            }
+
+            .bottom-nav {
+                display: flex;
             }
 
             .header h1 {
@@ -322,7 +327,7 @@
 
         @media (max-width: 480px) {
             .header {
-                padding: 4rem 0.5rem 2rem;
+                display: none; /* Hide header on mobile */
             }
 
             .header h1 {
@@ -362,12 +367,12 @@
     </nav>
 
     <!-- Header -->
-    <header class="header">
+    <!-- <header class="header">
         <div class="portal-badge">👥 Staff Portal</div>
         <h1>Staff Login</h1>
         <p class="subtitle">Welcome back! Sign in to your account 🍽️</p>
-    </header>
-
+    </header> -->
+    <br><br><br><br><br><br>
     <!-- Login Form -->
     <section class="login-section">
         <div class="login-card">
@@ -427,6 +432,26 @@
             });
         }, 5000);
     </script>
+
+    <!-- Bottom Navigation -->
+    <nav class="bottom-nav">
+        <a href="{% url 'orders:home' %}" class="bottom-nav-item">
+            <span>🏠</span>
+            <span>Home</span>
+        </a>
+        <a href="{% url 'orders:menu' %}" class="bottom-nav-item">
+            <span>🍽️</span>
+            <span>Menu</span>
+        </a>
+        <a href="{% url 'orders:profile' %}" class="bottom-nav-item">
+            <span>👤</span>
+            <span>Profile</span>
+        </a>
+        <a href="{% url 'orders:terms' %}" class="bottom-nav-item">
+            <span>📋</span>
+            <span>Terms</span>
+        </a>
+    </nav>
 </body>
 
 </html>

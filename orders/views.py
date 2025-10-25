@@ -16,7 +16,7 @@ def register(request):
         email = request.POST.get('email')
         password = request.POST.get('password')
         confirm_password = request.POST.get('confirm_password')
-        full_name = request.POST.get('full_name')
+        id_number = request.POST.get('id_number')
         phone_number = request.POST.get('phone_number')
         
         if password != confirm_password:
@@ -36,7 +36,7 @@ def register(request):
             username=username,
             email=email,
             password=password,
-            first_name=full_name
+            first_name=id_number
         )
         
         # Create profile

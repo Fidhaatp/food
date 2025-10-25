@@ -332,9 +332,50 @@
             }
         }
 
+        /* Bottom Navigation */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--white);
+            display: none;
+            justify-content: space-around;
+            padding: 0.75rem 0;
+            box-shadow: var(--shadow-light);
+            border-top-left-radius: 20px;
+            border-top-right-radius: 20px;
+            z-index: 1000;
+        }
+
+        .bottom-nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-decoration: none;
+            color: var(--text);
+            font-size: 0.8rem;
+            padding: 0.5rem;
+            transition: all var(--transition);
+            border-radius: 50%;
+        }
+
+        .bottom-nav-item.active {
+            background: var(--primary);
+            color: var(--white);
+        }
+
+        .bottom-nav-item:hover {
+            color: var(--primary);
+        }
+
         @media (max-width: 600px) {
             .header {
-                padding: 1rem;
+                display: none; /* Hide header on mobile */
+            }
+
+            .bottom-nav {
+                display: flex;
             }
 
             .logo {
@@ -343,6 +384,8 @@
 
             .container {
                 padding: 1rem;
+                padding-top: 2px;
+                padding-bottom: 100px;
             }
 
             .welcome-title {
@@ -355,7 +398,7 @@
             }
 
             .category-card {
-                height: 200px;
+                height: 260px;
             }
 
             .category-title {
@@ -377,7 +420,7 @@
     <header class="header">
         <div class="logo">🍴 Staff Portal</div>
         <div class="user-info">
-            <span class="user-name">Welcome, {{ user.first_name|default:user.username }}</span>
+            <span class="user-name">Welcome, {{ user.username }}</span>
             <a href="{% url 'orders:logout' %}" class="logout-btn">Logout</a>
         </div>
     </header>
@@ -513,5 +556,25 @@
             });
         });
     </script>
+
+    <!-- Bottom Navigation -->
+    <nav class="bottom-nav">
+        <a href="{% url 'orders:home' %}" class="bottom-nav-item active">
+            <span>🏠</span>
+            <span>Home</span>
+        </a>
+        <a href="{% url 'orders:menu' %}" class="bottom-nav-item">
+            <span>🍽️</span>
+            <span>Menu</span>
+        </a>
+        <a href="{% url 'orders:profile' %}" class="bottom-nav-item">
+            <span>👤</span>
+            <span>Profile</span>
+        </a>
+        <a href="{% url 'orders:terms' %}" class="bottom-nav-item">
+            <span>📋</span>
+            <span>Terms</span>
+        </a>
+    </nav>
 </body>
 </html>

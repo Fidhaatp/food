@@ -1505,7 +1505,7 @@
                                 {% for user_id, staff_data in today_staff.items %}
                                 <div class="today-staff-item">
                                     <div class="staff-info">
-                                        <strong>{{ staff_data.user.first_name|default:staff_data.user.username }}</strong>
+                                        <strong>{{ staff_data.user.username }}</strong>
                                         <span class="staff-amount">₹{{ staff_data.total_amount|floatformat:2 }}</span>
                                     </div>
                                     <div class="staff-categories">
@@ -1600,7 +1600,7 @@
                                 <div class="member-header">
                                     <div class="member-info">
                                         <input type="checkbox" class="member-checkbox" data-user-id="{{ user_data.user.id }}" onchange="updateBulkDeleteButton()">
-                                        <h4 class="member-name">{{ user_data.user.first_name|default:user_data.user.username }} {{ user_data.user.last_name|default:"" }}</h4>
+                                        <h4 class="member-name">{{ user_data.user.username }}</h4>
                                     </div>
                                     <div class="member-amount">₹{{ user_data.total_amount|floatformat:2 }}</div>
                                 </div>

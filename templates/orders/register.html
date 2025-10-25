@@ -279,13 +279,18 @@
         }
 
         /* Responsive */
+
         @media (max-width: 1024px) {
             .top-nav {
                 display: none;
             }
 
             .header {
-                padding: 5rem 1rem 2.5rem;
+                display: none; /* Hide header on mobile */
+            }
+
+            .bottom-nav {
+                display: flex;
             }
 
             .header h1 {
@@ -311,7 +316,7 @@
 
         @media (max-width: 480px) {
             .header {
-                padding: 4rem 0.5rem 2rem;
+                display: none; /* Hide header on mobile */
             }
 
             .header h1 {
@@ -351,11 +356,11 @@
     </nav>
 
     <!-- Header -->
-    <header class="header">
+    <!-- <header class="header">
         <h1>Register</h1>
         <p class="subtitle">Create your account to start ordering 🍽️</p>
-    </header>
-
+    </header> -->
+    <br><br><br><br><br><br>
     <!-- Register Form -->
     <section class="register-section">
         <div class="register-card">
@@ -374,11 +379,11 @@
                     <input type="text" id="username" name="username" required>
                 </div>
                 <div class="form-group">
-                    <label for="full_name">Full Name</label>
-                    <input type="text" id="full_name" name="full_name" required>
+                    <label for="id_number">ID Number</label>
+                    <input type="text" id="id_number" name="id_number" required>
                 </div>
                 <div class="form-group">
-                    <label for="email">Email</label>
+                    <label for="email">Company Mail</label>
                     <input type="email" id="email" name="email" required>
                 </div>
                 <div class="form-group">
@@ -431,6 +436,26 @@
             });
         }, 5000);
     </script>
+
+    <!-- Bottom Navigation -->
+    <nav class="bottom-nav">
+        <a href="{% url 'orders:home' %}" class="bottom-nav-item">
+            <span>🏠</span>
+            <span>Home</span>
+        </a>
+        <a href="{% url 'orders:menu' %}" class="bottom-nav-item">
+            <span>🍽️</span>
+            <span>Menu</span>
+        </a>
+        <a href="{% url 'orders:profile' %}" class="bottom-nav-item">
+            <span>👤</span>
+            <span>Profile</span>
+        </a>
+        <a href="{% url 'orders:terms' %}" class="bottom-nav-item">
+            <span>📋</span>
+            <span>Terms</span>
+        </a>
+    </nav>
 </body>
 
 </html>

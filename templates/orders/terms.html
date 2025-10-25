@@ -201,16 +201,57 @@
             box-shadow: 0 4px 15px rgba(255, 145, 77, 0.3);
         }
 
+        /* Bottom Navigation */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--white);
+            display: none;
+            justify-content: space-around;
+            padding: 0.75rem 0;
+            box-shadow: var(--shadow-light);
+            border-top-left-radius: 20px;
+            border-top-right-radius: 20px;
+            z-index: 1000;
+        }
+
+        .bottom-nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-decoration: none;
+            color: var(--text);
+            font-size: 0.8rem;
+            padding: 0.5rem;
+            transition: all var(--transition);
+            border-radius: 50%;
+        }
+
+        .bottom-nav-item.active {
+            background: var(--primary);
+            color: var(--white);
+        }
+
+        .bottom-nav-item:hover {
+            color: var(--primary);
+        }
+
         /* Responsive */
         @media (max-width: 768px) {
             .header {
-                padding: 1rem;
-                flex-direction: column;
-                gap: 1rem;
+                display: none; /* Hide header on mobile */
+            }
+
+            .bottom-nav {
+                display: flex;
             }
 
             .container {
                 padding: 1rem;
+                padding-top: 2px;
+                padding-bottom: 100px;
             }
 
             .page-title {
@@ -232,7 +273,7 @@
     <header class="header">
         <div class="logo">🍴 Staff Portal</div>
         <div class="user-info">
-            <span class="user-name">Welcome, {{ user.first_name|default:user.username }}</span>
+            <span class="user-name">Welcome, {{ user.username }}</span>
             <a href="{% url 'orders:logout' %}" class="logout-btn">Logout</a>
         </div>
     </header>
@@ -252,7 +293,9 @@
                     <div class="section-content">
                         <p>By using our food ordering system, you agree to the following terms and conditions:</p>
                         <ul>
-                            <li>Orders must be placed before the specified cutoff time for each meal</li>
+                            <li> ഫുഡ് എല്ലാ സ്റ്റാഫിനും സബ്‌സിഡി  നിരക്കിലാവും തയ്യാർ ചെയ്തിട്ടുള്ളത്.</li>
+                            <li>ഫുഡ് ആവിശ്യം ഉള്ളവർ രാവിലെ 10 : 30 ക്ക് മുമ്പായി ടോക്കൺ എടുക്കണം.</li>
+                            <li>10 : 30 ക്ക് ശേഷം ടോക്കൺ എടുക്കാൻ പറ്റില്ല. അന്ന് ഫുഡ് ലഭിക്കുകയും ഇല്ല.</li>
                             <li>Once an order is placed, it cannot be cancelled or modified</li>
                             <li>Each staff member can place only one order per category per day</li>
                             <li>Locked categories are not available for ordering</li>
@@ -265,16 +308,14 @@
                 </div>
 
                 <!-- Payment Terms -->
-                <div class="section">
+               <!--  <div class="section">
                     <h2 class="section-title">
                         💳 Payment Terms
                     </h2>
                     <div class="section-content">
                         <p>Payment for food orders will be processed as follows:</p>
                         <ul>
-                            <li>Orders are automatically charged to your account</li>
-                            <li>Payment is due immediately upon order placement</li>
-                            <li>Failed payments will result in order cancellation</li>
+                            
                             <li>Refunds are only available for cancelled orders by the kitchen</li>
                             <li>Monthly statements will be provided for all transactions</li>
                         </ul>
@@ -284,7 +325,6 @@
                     </div>
                 </div>
 
-                <!-- Food Quality & Safety -->
                 <div class="section">
                     <h2 class="section-title">
                         🍽️ Food Quality & Safety
@@ -304,7 +344,6 @@
                     </div>
                 </div>
 
-                <!-- Account Management -->
                 <div class="section">
                     <h2 class="section-title">
                         👤 Account Management
@@ -321,7 +360,6 @@
                     </div>
                 </div>
 
-                <!-- Cancellation Policy -->
                 <div class="section">
                     <h2 class="section-title">
                         ❌ Cancellation Policy
@@ -338,7 +376,6 @@
                     </div>
                 </div>
 
-                <!-- Privacy Policy -->
                 <div class="section">
                     <h2 class="section-title">
                         🔒 Privacy Policy
@@ -355,7 +392,6 @@
                     </div>
                 </div>
 
-                <!-- Contact Information -->
                 <div class="section">
                     <h2 class="section-title">
                         📞 Contact Information
@@ -370,7 +406,7 @@
                             <li><strong>Office Hours:</strong> 8:00 AM - 6:00 PM (Monday-Friday)</li>
                         </ul>
                     </div>
-                </div>
+                </div> -->
 
                 <!-- Agreement -->
                 <div class="section">
@@ -417,5 +453,25 @@
             // You could add a progress bar here if needed
         });
     </script>
+
+    <!-- Bottom Navigation -->
+    <nav class="bottom-nav">
+        <a href="{% url 'orders:home' %}" class="bottom-nav-item">
+            <span>🏠</span>
+            <span>Home</span>
+        </a>
+        <a href="{% url 'orders:menu' %}" class="bottom-nav-item">
+            <span>🍽️</span>
+            <span>Menu</span>
+        </a>
+        <a href="{% url 'orders:profile' %}" class="bottom-nav-item">
+            <span>👤</span>
+            <span>Profile</span>
+        </a>
+        <a href="{% url 'orders:terms' %}" class="bottom-nav-item active">
+            <span>📋</span>
+            <span>Terms</span>
+        </a>
+    </nav>
 </body>
 </html>

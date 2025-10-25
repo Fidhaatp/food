@@ -208,13 +208,12 @@
         /* Responsive */
         @media (max-width: 768px) {
             .header {
-                padding: 1rem;
-                flex-direction: column;
-                gap: 1rem;
+                display: none; /* Hide header on mobile */
             }
 
             .main {
                 padding: 1rem;
+                padding-top: 2px;
             }
 
             .page-title {
@@ -273,7 +272,7 @@
                     {% if category_data.orders %}
                         {% for order in category_data.orders %}
                         <div class="order-item">
-                            <div class="order-user">{{ order.user.first_name|default:order.user.username }}</div>
+                            <div class="order-user">{{ order.user.username }}</div>
                         </div>
                         {% endfor %}
                     {% else %}

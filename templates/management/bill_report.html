@@ -706,8 +706,8 @@
                     <tbody>
                         {% for staff in staff_summary %}
                         <tr>
-                            <td class="staff-name">{{ staff.user.first_name|default:staff.user.username }}</td>
-                            <td>{{ staff.total_orders }}</td>
+                            <td class="staff-name">{{ staff.user.username  }}</td>
+                            <td>{{ staff.total_days }}</td>
                             <td class="amount-cell">₹{{ staff.total_amount|floatformat:0 }}</td>
                             <td class="amount-cell">₹{{ staff.completed_amount|floatformat:0 }}</td>
                             <td class="amount-cell">₹{{ staff.balance|floatformat:0 }}</td>
